@@ -1,0 +1,6 @@
+@EcoFleetLogistics.Api_HostAddress = http://localhost:5027
+
+GET {{EcoFleetLogistics.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
