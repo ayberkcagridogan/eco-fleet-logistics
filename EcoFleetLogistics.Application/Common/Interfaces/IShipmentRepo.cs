@@ -4,9 +4,9 @@ namespace EcoFleetLogistics.Application.Common.Interfaces
 {
     public interface IShipmentRepo
     {
-        Task<Shipment?> GetByIdAsync(Guid id);
-        Task<Shipment?> GetByTrackingNumberAsync(string trackingNumber);
-        Task AddAsync(Shipment shipment);
-        Task UpdateAsync(Shipment shipment);
+        Task<Shipment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
+        Task<Shipment?> GetByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default);
+        Task AddAsync(Shipment shipment, CancellationToken cancellationToken = default);
+        Task UpdateAsync(Shipment shipment, CancellationToken cancellationToken = default);
     }
 }
