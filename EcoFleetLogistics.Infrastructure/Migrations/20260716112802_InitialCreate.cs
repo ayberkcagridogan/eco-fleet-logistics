@@ -17,7 +17,9 @@ namespace EcoFleetLogistics.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TrackingNumber = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    Destination = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    SenderName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ReceiverName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    DestinationAddress = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Weight = table.Column<double>(type: "float", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),

@@ -1,8 +1,19 @@
+using EcoFleetLogistics.Application.Common.Behaviors;
+using EcoFleetLogistics.Application.Shipments.Commands.CreateShipment;
+using EcoFleetLogistics.Application.Shipments.Queries.GetShipmentById;
 using EcoFleetLogistics.Infrastructure;
+using FluentValidation;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddValidatorsFromAssembly(typeof(CreateShipmentCommandValidator).Assembly);
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(CreateShipmentCommandHandler).Assembly);
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
@@ -13,33 +24,34 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
 
-app.MapGet("/weatherforecast", () =>
+app.MapPost("/api/shipments", async (
+    [FromBody] CreateShipmentCommand command,
+    ISender madiator,
+    CancellationToken cancellationToken) =>
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    var shipmentId = await madiator.Send(command, cancellationToken);
+    return Results.Created($"/api/shipments/{shipmentId}", new { Id = shipmentId });
 })
-.WithName("GetWeatherForecast");
+.WithName("CreateShipment")
+.WithOpenApi();
+
+app.MapGet("/api/shipments/{id:guid}", async (
+    Guid id,
+    ISender madiator,
+    CancellationToken cancellationToken) =>
+{
+    var query = new GetShipmentByIdQuery(id);
+    var result = await madiator.Send(query, cancellationToken);
+    return result is not null 
+        ? Results.Ok(result) 
+        : Results.NotFound(new {Message = $"Shipment with Id {id} not found."});
+})
+.WithName("GetShipmentById")
+.WithOpenApi();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

@@ -22,7 +22,15 @@ namespace EcoFleetLogistics.Infrastructure.Persistence
                     .IsRequired()
                     .HasMaxLength(50);
 
-                entity.Property(e => e.Destination)
+                entity.Property(e => e.ReceiverName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+                
+                entity.Property(e => e.SenderName)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.DestinationAddress)
                     .IsRequired()
                     .HasMaxLength(500);
 

@@ -6,29 +6,46 @@ namespace EcoFleetLogistics.Domain.Shipments
     {
         public Guid Id { get; private set; }
         public string TrackingNumber { get; private set; }
-        public string Destination { get; private set; }
+        public string SenderName { get; private set; }
+        public string ReceiverName { get; private set; }
+        public string DestinationAddress { get; private set; }
         public double Weight { get; private set; }
         public ShipmentStatus Status { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
-        public Shipment(string trackingNumber, string destination, double weight)
+        private Shipment() { } // Parameterless constructor for EF Core
+
+        private Shipment(Guid id, string trackingNumber, string senderName, string receiverName, string destinationAddress, double weight)
+        {
+            Id = id;
+            TrackingNumber = trackingNumber;
+            SenderName = senderName;
+            ReceiverName = receiverName;
+            DestinationAddress = destinationAddress;
+            Weight = weight;
+            Status = ShipmentStatus.Pending;
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = null;
+        }
+        public static Shipment Create(string trackingNumber, string senderName, string receiverName, string destinationAddress, double weight)
         {
             if (string.IsNullOrWhiteSpace(trackingNumber))
                 throw new ArgumentException("Tracking number cannot be empty.");
 
-            if (string.IsNullOrWhiteSpace(destination))
+            if (string.IsNullOrWhiteSpace(senderName))
+                throw new ArgumentException("Sender name cannot be empty.");
+
+            if (string.IsNullOrWhiteSpace(receiverName))
+                throw new ArgumentException("Receiver name cannot be empty.");
+
+            if (string.IsNullOrWhiteSpace(destinationAddress))
                 throw new ArgumentException("Destination cannot be empty.");
 
             if (weight <= 0)
                 throw new ArgumentException("Weight must be greater than zero.");
 
-            Id = Guid.NewGuid();
-            TrackingNumber = trackingNumber;
-            Destination = destination;
-            Weight = weight;
-            Status = ShipmentStatus.Pending;
-            CreatedAt = DateTime.UtcNow;
+            return new Shipment(Guid.NewGuid(), trackingNumber, senderName, receiverName, destinationAddress, weight);
         }
         public void StartTransit()
         {
