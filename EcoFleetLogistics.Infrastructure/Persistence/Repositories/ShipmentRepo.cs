@@ -20,7 +20,9 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
 
         public async Task<Shipment?> GetByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default)
         {
-            return await _context.Shipments.FirstOrDefaultAsync(s => s.TrackingNumber == trackingNumber, cancellationToken);
+            return await _context.Shipments
+                                    .AsNoTracking()
+                                    .FirstOrDefaultAsync(s => s.TrackingNumber == trackingNumber, cancellationToken);
         }
 
         public async Task AddAsync(Shipment shipment, CancellationToken cancellationToken = default)
