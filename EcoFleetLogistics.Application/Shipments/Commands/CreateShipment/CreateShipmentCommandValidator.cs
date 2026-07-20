@@ -1,15 +1,20 @@
+using EcoFleetLogistics.Application.Common.Interfaces;
 using FluentValidation;
 
 namespace EcoFleetLogistics.Application.Shipments.Commands.CreateShipment;
 
 public class CreateShipmentCommandValidator : AbstractValidator<CreateShipmentCommand>
 {
-    public CreateShipmentCommandValidator()
+    private readonly IShipmentRepo _shipmentRepo;
+    public CreateShipmentCommandValidator(IShipmentRepo shipmentRepo)
     {
+        _shipmentRepo = shipmentRepo;
+
         RuleFor(x => x.TrackingNumber)
             .NotEmpty().WithMessage("Tracking number is required.")
             .MinimumLength(5).WithMessage("Tracking number must be at least 5 characters long.")
-            .MaximumLength(50).WithMessage("Tracking number cannot exceed 50 characters.");
+            .MaximumLength(50).WithMessage("Tracking number cannot exceed 50 characters.")
+            .MustAsync(BeUniqueTrackingNumber).WithMessage("A shipment with this tracking number already exists.");
 
         RuleFor(x => x.SenderName)
             .NotEmpty().WithMessage("Sender name is required.")
@@ -26,5 +31,10 @@ public class CreateShipmentCommandValidator : AbstractValidator<CreateShipmentCo
         
         RuleFor(x => x.Weight)
             .GreaterThan(0).WithMessage("Weight must be greater than 0 kg.");
+    }
+
+    private async Task<bool> BeUniqueTrackingNumber(string trackingNumber, CancellationToken cancellationToken)
+    {
+        return !await _shipmentRepo.ExistsByTrackingNumberAsync(trackingNumber, cancellationToken);
     }
 }
