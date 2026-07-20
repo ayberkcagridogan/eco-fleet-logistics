@@ -36,5 +36,12 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
             _context.Shipments.Update(shipment);
             await _context.SaveChangesAsync(cancellationToken);
         }
+
+        public async Task<bool> ExistsByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default)
+        {
+            return await _context.Shipments
+                                    .AsNoTracking()
+                                    .AnyAsync(s => s.TrackingNumber == trackingNumber, cancellationToken);
+        }
     }
 }

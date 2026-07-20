@@ -21,6 +21,9 @@ namespace EcoFleetLogistics.Infrastructure.Persistence
                 entity.Property(e => e.TrackingNumber)
                     .IsRequired()
                     .HasMaxLength(50);
+                
+                entity.HasIndex(e => e.TrackingNumber)
+                    .IsUnique();
 
                 entity.Property(e => e.ReceiverName)
                     .IsRequired()

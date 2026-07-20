@@ -8,5 +8,6 @@ namespace EcoFleetLogistics.Application.Common.Interfaces
         Task<Shipment?> GetByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default);
         Task AddAsync(Shipment shipment, CancellationToken cancellationToken = default);
         Task UpdateAsync(Shipment shipment, CancellationToken cancellationToken = default);
+        Task<bool> ExistsByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default);
     }
 }
