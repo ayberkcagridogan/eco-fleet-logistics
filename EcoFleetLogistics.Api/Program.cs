@@ -6,6 +6,8 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using EcoFleetLogistics.Api.Middleware;
+using EcoFleetLogistics.Domain.Shipments.Enums;
+using EcoFleetLogistics.Application.Shipments.Commands.ChangeShipmentStatus;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,6 +46,7 @@ app.MapPost("/api/shipments", async (
 .WithName("CreateShipment")
 .WithOpenApi();
 
+
 app.MapGet("/api/shipments/{id:guid}", async (
     Guid id,
     ISender madiator,
@@ -56,6 +59,21 @@ app.MapGet("/api/shipments/{id:guid}", async (
         : Results.NotFound(new {Message = $"Shipment with Id {id} not found."});
 })
 .WithName("GetShipmentById")
+.WithOpenApi();
+
+app.MapPatch("/api/shipments/{id:guid}/status", async (
+    Guid id,
+    ShipmentStatus newStatus,
+    ISender madiator,
+    CancellationToken cancellationToken ) => 
+    {
+        var command = new ChangeShipmentStatusCommand(id, newStatus);
+        var isSucces = await madiator.Send(command, cancellationToken);
+        return isSucces 
+            ? Results.NoContent()
+            : Results.NotFound(new {Message = $"Shipment with Id {id} not found."});
+    })
+.WithName("ChangeShipmentStatus")
 .WithOpenApi();
 
 app.Run();

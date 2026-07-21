@@ -3,3 +3,4 @@
 *.user
 .vs/
 *appsettings.Development.json
+.vscode/launch.json

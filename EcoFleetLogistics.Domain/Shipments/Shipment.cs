@@ -77,6 +77,32 @@ namespace EcoFleetLogistics.Domain.Shipments
             Status = ShipmentStatus.Cancelled;
             UpdatedAt = DateTime.UtcNow;
         }
+        public void ChangeStatus(ShipmentStatus newStatus)
+        {
+            if (Status == newStatus)
+                return;
+
+
+            if(Status == ShipmentStatus.Delivered)
+            {
+                throw new InvalidOperationException("A 'Delivered' shipment cannot be modified.");
+            }
+            if (Status == ShipmentStatus.Cancelled)
+            {
+                throw new InvalidOperationException("A 'Cancelled' shipment cannot be modified.");
+            }
+            if (Status == ShipmentStatus.Pending && newStatus == ShipmentStatus.Delivered)
+            {
+                throw new InvalidOperationException("A shipment cannot transition directly from 'Pending' to 'Delivered'. It must be 'InTransit' first.");
+            }
+            if (Status == ShipmentStatus.InTransit && newStatus == ShipmentStatus.Cancelled)
+            {
+                throw new InvalidOperationException("An 'InTransit' shipment cannot be cancelled.");
+            }
+
+            Status = newStatus;
+            UpdatedAt = DateTime.UtcNow;
+        }
     }
 
 }
