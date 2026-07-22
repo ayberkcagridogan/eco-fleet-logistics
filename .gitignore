@@ -4,3 +4,11 @@
 .vs/
 *appsettings.Development.json
 .vscode/launch.json
+
+# Log files
+**/logs/
+*.log
+
+# macOS system files
+.DS_Store
+**/.DS_Store
