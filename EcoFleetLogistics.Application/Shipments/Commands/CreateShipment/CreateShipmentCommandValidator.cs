@@ -18,10 +18,12 @@ public class CreateShipmentCommandValidator : AbstractValidator<CreateShipmentCo
 
         RuleFor(x => x.SenderName)
             .NotEmpty().WithMessage("Sender name is required.")
+            .MinimumLength(2).WithMessage("Sender name must be at least 5 characters long.")
             .MaximumLength(50).WithMessage("Sender name cannot exceed 50 characters.");
         
         RuleFor(x => x.ReceiverName)
             .NotEmpty().WithMessage("Receiver name is required.")
+            .MinimumLength(2).WithMessage("Receiver name must be at least 5 characters long.")
             .MaximumLength(50).WithMessage("Receiver name cannot exceed 50 characters.");
         
         RuleFor(x => x.DestinationAddress)

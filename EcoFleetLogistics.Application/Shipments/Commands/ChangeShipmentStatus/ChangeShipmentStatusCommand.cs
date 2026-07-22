@@ -21,7 +21,20 @@ public class ChangeShipmentStatusCommandHandler : IRequestHandler<ChangeShipment
         if(shipment == null)
             return false;
         
-        shipment.ChangeStatus(request.NewStatus);
+        switch (request.NewStatus)
+        {
+            case ShipmentStatus.InTransit:
+                shipment.StartTransit();
+                break;
+            case ShipmentStatus.Delivered:
+                shipment.MarkAsDelivered();
+                break;
+            case ShipmentStatus.Cancelled:
+                shipment.Cancel();
+                break;
+            default:
+                throw new InvalidOperationException($"Unsupported status transition to {request.NewStatus}.");
+        }
         await _shipmentRepo.UpdateAsync(shipment, cancellationToken);
         return true;
     }

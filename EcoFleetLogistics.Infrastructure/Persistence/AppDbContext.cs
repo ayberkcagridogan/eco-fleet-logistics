@@ -43,6 +43,8 @@ namespace EcoFleetLogistics.Infrastructure.Persistence
                 entity.Property(e => e.Status)
                     .HasConversion<string>()
                     .IsRequired();
+
+                entity.HasQueryFilter(s => !s.IsDeleted);
             });
         }
     }
