@@ -12,6 +12,7 @@ using EcoFleetLogistics.Application.Shipments.Commands.UpdateShipment;
 using EcoFleetLogistics.Application.Shipments.Commands.DeleteShipment;
 using EcoFleetLogistics.Application;
 using Serilog;
+using EcoFleetLogistics.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -140,4 +141,7 @@ app.UseHttpsRedirection();
 
     #endregion
 #endregion
+
+
+await app.MigrateDatabaseAsync();
 app.Run();
