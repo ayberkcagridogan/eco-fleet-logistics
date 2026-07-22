@@ -11,6 +11,7 @@ using EcoFleetLogistics.Application.Shipments.Commands.ChangeShipmentStatus;
 using EcoFleetLogistics.Application.Shipments.Commands.UpdateShipment;
 using EcoFleetLogistics.Application.Shipments.Commands.DeleteShipment;
 using EcoFleetLogistics.Application;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,11 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
 }
+
+app.UseSerilogRequestLogging(options =>
+{
+    options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+});
 
 app.UseHttpsRedirection();
 #endregion
