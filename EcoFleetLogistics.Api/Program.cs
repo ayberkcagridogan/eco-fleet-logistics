@@ -10,16 +10,17 @@ using EcoFleetLogistics.Domain.Shipments.Enums;
 using EcoFleetLogistics.Application.Shipments.Commands.ChangeShipmentStatus;
 using EcoFleetLogistics.Application.Shipments.Commands.UpdateShipment;
 using EcoFleetLogistics.Application.Shipments.Commands.DeleteShipment;
+using EcoFleetLogistics.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Services & Dependencies (DI)
+builder.Host.UseCustemSerilog();
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
-builder.Services.AddValidatorsFromAssembly(typeof(CreateShipmentCommandValidator).Assembly);
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(CreateShipmentCommandHandler).Assembly);
-    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
-});
+
+builder.Services.AddApplicationServices();
+
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
