@@ -22,6 +22,8 @@ namespace EcoFleetLogistics.Infrastructure.Migrations
                     DestinationAddress = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
                     Weight = table.Column<double>(type: "float", nullable: false),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -29,6 +31,12 @@ namespace EcoFleetLogistics.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_Shipments", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Shipments_TrackingNumber",
+                table: "Shipments",
+                column: "TrackingNumber",
+                unique: true);
         }
 
         /// <inheritdoc />

@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+
+  # 1. SQL Server 2022 (Intel / x86_64 Native)
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ecofleet-sqlserver
+    user: "0:0"
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Password123
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql/data
+
+  # 2. Seq 
+  seq:
+    image: datalust/seq:latest
+    container_name: ecofleet-seq
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - SEQ_FIRSTRUN_ADMINPASSWORD=Parola123!
+    ports:
+      - "5341:80"
+    volumes:
+      - seq_data:/data
+
+volumes:
+  mssql_data:
+  seq_data:
