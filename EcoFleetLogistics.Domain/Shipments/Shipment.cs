@@ -11,6 +11,8 @@ namespace EcoFleetLogistics.Domain.Shipments
         public string DestinationAddress { get; private set; }
         public double Weight { get; private set; }
         public ShipmentStatus Status { get; private set; }
+        public bool IsDeleted { get; private set; }
+        public DateTime? DeletedAt { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
@@ -47,6 +49,25 @@ namespace EcoFleetLogistics.Domain.Shipments
 
             return new Shipment(Guid.NewGuid(), trackingNumber, senderName, receiverName, destinationAddress, weight);
         }
+
+        public void UpdateDetails(string? receiverName = null, string? destinationAddress = null)
+        {
+            EnsureNotFinalState();
+
+            if (string.IsNullOrWhiteSpace(receiverName) && string.IsNullOrWhiteSpace(destinationAddress))
+                throw new InvalidOperationException("At least one field (ReceiverName or DestinationAddress) must be provided for update.");
+
+            if(Status == ShipmentStatus.InTransit)
+                throw new InvalidOperationException("Cannot update details while shipment is In Transit.");
+
+            if (!string.IsNullOrWhiteSpace(receiverName))
+                ReceiverName = receiverName;
+                
+            if (!string.IsNullOrWhiteSpace(destinationAddress))
+                DestinationAddress = destinationAddress;
+
+            UpdatedAt = DateTime.UtcNow;
+        }
         public void StartTransit()
         {
             if (Status != ShipmentStatus.Pending)
@@ -69,39 +90,35 @@ namespace EcoFleetLogistics.Domain.Shipments
         }
         public void Cancel()
         {
-            if (Status != ShipmentStatus.Pending)
-            {
-                throw new InvalidOperationException("Only pending shipments can be cancelled.");
-            }
+            if (Status == ShipmentStatus.InTransit)
+            throw new InvalidOperationException("An 'InTransit' shipment cannot be cancelled.");
+
+            if (Status == ShipmentStatus.Delivered)
+                throw new InvalidOperationException("A 'Delivered' shipment cannot be cancelled.");
 
             Status = ShipmentStatus.Cancelled;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void ChangeStatus(ShipmentStatus newStatus)
+
+        public void Delete()
         {
-            if (Status == newStatus)
-                return;
+            if (Status == ShipmentStatus.InTransit)
+                throw new InvalidOperationException("An 'InTransit' shipment cannot be deleted.");
 
+            if (Status == ShipmentStatus.Delivered)
+                throw new InvalidOperationException("A 'Delivered' shipment cannot be deleted.");
+                
+            IsDeleted = true;
+            DeletedAt = DateTime.UtcNow;
+        }
 
-            if(Status == ShipmentStatus.Delivered)
-            {
+        private void EnsureNotFinalState()
+        {
+            if (Status == ShipmentStatus.Delivered)
                 throw new InvalidOperationException("A 'Delivered' shipment cannot be modified.");
-            }
-            if (Status == ShipmentStatus.Cancelled)
-            {
-                throw new InvalidOperationException("A 'Cancelled' shipment cannot be modified.");
-            }
-            if (Status == ShipmentStatus.Pending && newStatus == ShipmentStatus.Delivered)
-            {
-                throw new InvalidOperationException("A shipment cannot transition directly from 'Pending' to 'Delivered'. It must be 'InTransit' first.");
-            }
-            if (Status == ShipmentStatus.InTransit && newStatus == ShipmentStatus.Cancelled)
-            {
-                throw new InvalidOperationException("An 'InTransit' shipment cannot be cancelled.");
-            }
 
-            Status = newStatus;
-            UpdatedAt = DateTime.UtcNow;
+            if (Status == ShipmentStatus.Cancelled)
+                throw new InvalidOperationException("A 'Cancelled' shipment cannot be modified.");
         }
     }
 
