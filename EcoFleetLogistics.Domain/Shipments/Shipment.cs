@@ -16,7 +16,13 @@ namespace EcoFleetLogistics.Domain.Shipments
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
-        private Shipment() { } // Parameterless constructor for EF Core
+        private Shipment() // Parameterless constructor for EF Core
+        {
+            TrackingNumber = null!;
+            SenderName = null!;
+            ReceiverName = null!;
+            DestinationAddress = null!;
+        } 
 
         private Shipment(Guid id, string trackingNumber, string senderName, string receiverName, string destinationAddress, double weight)
         {
