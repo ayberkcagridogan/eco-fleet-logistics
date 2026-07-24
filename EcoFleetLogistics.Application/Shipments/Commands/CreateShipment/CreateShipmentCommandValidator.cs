@@ -1,4 +1,4 @@
-using EcoFleetLogistics.Application.Common.Interfaces;
+using EcoFleetLogistics.Application.Common.Persistence;
 using FluentValidation;
 
 namespace EcoFleetLogistics.Application.Shipments.Commands.CreateShipment;

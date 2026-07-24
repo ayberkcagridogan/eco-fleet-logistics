@@ -1,4 +1,5 @@
 using EcoFleetLogistics.Domain.Shipments;
+using EcoFleetLogistics.Domain.User;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoFleetLogistics.Infrastructure.Persistence
@@ -10,6 +11,7 @@ namespace EcoFleetLogistics.Infrastructure.Persistence
         }
 
         public DbSet<Shipment> Shipments => Set<Shipment>();
+        public DbSet<User> Users => Set<User>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
