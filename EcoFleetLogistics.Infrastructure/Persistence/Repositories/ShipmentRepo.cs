@@ -1,6 +1,6 @@
 namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
 {
-    using EcoFleetLogistics.Application.Common.Interfaces;
+    using EcoFleetLogistics.Application.Common.Persistence;
     using EcoFleetLogistics.Domain.Shipments;
     using Microsoft.EntityFrameworkCore;
 

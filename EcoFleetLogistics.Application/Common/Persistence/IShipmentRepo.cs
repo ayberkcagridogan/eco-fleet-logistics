@@ -1,6 +1,6 @@
 using EcoFleetLogistics.Domain.Shipments;
 
-namespace EcoFleetLogistics.Application.Common.Interfaces
+namespace EcoFleetLogistics.Application.Common.Persistence
 {
     public interface IShipmentRepo
     {

@@ -1,4 +1,4 @@
-using EcoFleetLogistics.Application.Common.Interfaces;
+using EcoFleetLogistics.Application.Common.Persistence;
 using MediatR;
 
 namespace EcoFleetLogistics.Application.Shipments.Queries.GetShipmentById;

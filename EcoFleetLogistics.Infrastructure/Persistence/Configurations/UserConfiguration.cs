@@ -1,4 +1,5 @@
 using EcoFleetLogistics.Domain.User;
+using EcoFleetLogistics.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -21,6 +22,9 @@ public class UserCongiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(50);
         
         builder.Property(u => u.Email)
+            .HasConversion(
+                email => email.Value,
+                value => Email.Create(value))
             .IsRequired()
             .HasMaxLength(256);
         
