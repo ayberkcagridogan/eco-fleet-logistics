@@ -1,7 +1,10 @@
 namespace EcoFleetLogistics.Infrastructure
 {
+    using EcoFleetLogistics.Application.Authentication.Common;
     using EcoFleetLogistics.Application.Common.Interfaces;
+    using EcoFleetLogistics.Application.Common.Persistence;
     using EcoFleetLogistics.Infrastructure.Persistence;
+    using EcoFleetLogistics.Infrastructure.Persistence.Authentication;
     using EcoFleetLogistics.Infrastructure.Persistence.Repositories;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
@@ -32,9 +35,16 @@ namespace EcoFleetLogistics.Infrastructure
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
                 b => b.MigrationsAssembly("EcoFleetLogistics.Infrastructure")));
-                
-            services.AddScoped<IShipmentRepo, ShipmentRepo>();
 
+            services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
+               
+            services.AddSingleton<IPasswordHasher, PasswordHasher>();
+            services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+               
+               
+            services.AddScoped<IShipmentRepo, ShipmentRepo>();
+            services.AddScoped<IUserRepo, UserRepo>();
+            
             return services;
         }
     }
