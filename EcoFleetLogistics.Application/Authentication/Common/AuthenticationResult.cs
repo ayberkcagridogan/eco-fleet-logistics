@@ -6,5 +6,6 @@ public record AuthenticationResult(
     string LastName,
     string Email,
     string Role,
-    string Token
+    string AccessToken,
+    string RefreshToken
 );

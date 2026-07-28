@@ -1,4 +1,4 @@
-namespace EcoFleetLogistics.Domain.User.Enums;
+namespace EcoFleetLogistics.Domain.Users.Enums;
 
 public enum UserRole
 {

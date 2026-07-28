@@ -1,6 +1,6 @@
-using EcoFleetLogistics.Application.Common.Interfaces;
+using EcoFleetLogistics.Application.Common.Authentication.Interfaces;
 
-namespace EcoFleetLogistics.Infrastructure.Persistence.Authentication;
+namespace EcoFleetLogistics.Infrastructure.Authentication;
 
 public class PasswordHasher : IPasswordHasher
 {

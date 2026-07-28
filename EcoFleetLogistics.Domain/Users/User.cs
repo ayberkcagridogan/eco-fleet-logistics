@@ -1,8 +1,7 @@
-using System.Collections;
-using EcoFleetLogistics.Domain.User.Enums;
+using EcoFleetLogistics.Domain.Users.Enums;
 using EcoFleetLogistics.Domain.ValueObjects;
 
-namespace EcoFleetLogistics.Domain.User;
+namespace EcoFleetLogistics.Domain.Users;
 public class User
 {
     public Guid Id { get; private set; }
@@ -34,16 +33,16 @@ public class User
     public static User Create(string firstName, string lastName, string email, string passwordHash, UserRole role = UserRole.User)
     {
          if (string.IsNullOrWhiteSpace(firstName))
-                throw new ArgumentException("First Name cannot be empty.");
+                throw new ArgumentException("First Name cannot be empty.", nameof(firstName));
 
             if (string.IsNullOrWhiteSpace(lastName))
-                throw new ArgumentException("Last name cannot be empty.");
+                throw new ArgumentException("Last name cannot be empty.", nameof(lastName));
 
             if (string.IsNullOrWhiteSpace(email))
-                throw new ArgumentException("E-mail name cannot be empty.");
+                throw new ArgumentException("E-mail name cannot be empty.", nameof(email));
 
             if (string.IsNullOrWhiteSpace(passwordHash))
-                throw new ArgumentException("Password cannot be empty.");
+                throw new ArgumentException("Password cannot be empty.", nameof(passwordHash));
             
         var emeilValueObject = Email.Create(email);
             
@@ -56,7 +55,7 @@ public class User
            return UserRole.User;
         
         if(!Enum.TryParse<UserRole>(role, ignoreCase: true, out var parsedRole))
-            throw new ArgumentException("Invalid role specified. Valid roles are: User, Admin vs.");
+            throw new ArgumentException("Invalid role specified. Valid roles are: User, Admin vs.", nameof(role));
         
         return parsedRole;
     }

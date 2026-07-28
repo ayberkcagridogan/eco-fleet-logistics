@@ -39,19 +39,19 @@ namespace EcoFleetLogistics.Domain.Shipments
         public static Shipment Create(string trackingNumber, string senderName, string receiverName, string destinationAddress, double weight)
         {
             if (string.IsNullOrWhiteSpace(trackingNumber))
-                throw new ArgumentException("Tracking number cannot be empty.");
+                throw new ArgumentException("Tracking number cannot be empty." , nameof(trackingNumber));
 
             if (string.IsNullOrWhiteSpace(senderName))
-                throw new ArgumentException("Sender name cannot be empty.");
+                throw new ArgumentException("Sender name cannot be empty.", nameof(senderName));
 
             if (string.IsNullOrWhiteSpace(receiverName))
-                throw new ArgumentException("Receiver name cannot be empty.");
+                throw new ArgumentException("Receiver name cannot be empty.", nameof(receiverName));
 
             if (string.IsNullOrWhiteSpace(destinationAddress))
-                throw new ArgumentException("Destination cannot be empty.");
+                throw new ArgumentException("Destination cannot be empty.", nameof(destinationAddress));
 
             if (weight <= 0)
-                throw new ArgumentException("Weight must be greater than zero.");
+                throw new ArgumentException("Weight must be greater than zero.", nameof(weight));
 
             return new Shipment(Guid.NewGuid(), trackingNumber, senderName, receiverName, destinationAddress, weight);
         }

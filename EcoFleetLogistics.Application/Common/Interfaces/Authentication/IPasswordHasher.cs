@@ -1,6 +1,6 @@
 using System.Reflection.Metadata;
 
-namespace EcoFleetLogistics.Application.Common.Interfaces;
+namespace EcoFleetLogistics.Application.Common.Authentication.Interfaces;
 
 public interface IPasswordHasher
 {
