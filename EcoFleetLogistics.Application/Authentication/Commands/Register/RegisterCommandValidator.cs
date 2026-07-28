@@ -1,6 +1,6 @@
 using System.Net.Cache;
 using EcoFleetLogistics.Application.Common.Persistence;
-using EcoFleetLogistics.Domain.User.Enums;
+using EcoFleetLogistics.Domain.Users.Enums;
 using EcoFleetLogistics.Domain.ValueObjects;
 using FluentValidation;
 

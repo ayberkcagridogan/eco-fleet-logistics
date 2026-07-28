@@ -1,6 +1,7 @@
-using System.Runtime.ConstrainedExecution;
 using EcoFleetLogistics.Application.Authentication.Common;
-using EcoFleetLogistics.Application.Common.Interfaces;
+using EcoFleetLogistics.Application.Common.Authentication.Interfaces;
+using EcoFleetLogistics.Application.Common.Interfaces.Authentication;
+using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Application.Common.Persistence;
 using MediatR;
 
@@ -12,13 +13,15 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
 {
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly ITokenService _tokenService;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public LoginCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, IJwtTokenGenerator jwtTokenGenerator)
+    public LoginCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnitOfWork unitOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
-        _jwtTokenGenerator = jwtTokenGenerator;
+        _tokenService = tokenService;
+        _unitOfWork = unitOfWork;
     }
     public async Task<AuthenticationResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -30,7 +33,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
         if(!isPasswordValid)
             throw new UnauthorizedAccessException("Incorrect email or password.");
 
-        var token = _jwtTokenGenerator.GenerateToken(user);
+        var tokenResult = await _tokenService.GenerateAndSaveTokensAsync(user, cancellationToken);
+
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new AuthenticationResult(
             user.Id,
@@ -38,6 +43,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
             user.LastName,
             user.Email.Value,
             user.Role.ToString(),
-            token);
+            tokenResult.AccessToken,
+            tokenResult.RefreshToken);
     }
 }

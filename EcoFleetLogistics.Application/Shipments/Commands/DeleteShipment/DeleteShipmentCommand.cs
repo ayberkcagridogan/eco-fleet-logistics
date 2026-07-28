@@ -1,3 +1,4 @@
+using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Application.Common.Persistence;
 using MediatR;
 
@@ -9,10 +10,12 @@ public record DeleteShipmentCommand(Guid Id) : IRequest<bool>;
 public class DeleteShipmentCommandHandler : IRequestHandler<DeleteShipmentCommand, bool>
 {
     private readonly IShipmentRepo _shipmentRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public DeleteShipmentCommandHandler(IShipmentRepo shipmentRepo)
+    public DeleteShipmentCommandHandler(IShipmentRepo shipmentRepo, IUnitOfWork unitOfWork)
     {
         _shipmentRepo = shipmentRepo;
+        _unitOfWork = unitOfWork;
     }
     public async Task<bool> Handle(DeleteShipmentCommand request, CancellationToken cancellationToken)
     {
@@ -22,7 +25,9 @@ public class DeleteShipmentCommandHandler : IRequestHandler<DeleteShipmentComman
             return false;
 
         shipment.Delete();
-        await _shipmentRepo.UpdateAsync(shipment, cancellationToken);
+        _shipmentRepo.Update(shipment, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         return true;
     }
 }
