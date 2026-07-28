@@ -1,13 +1,13 @@
 using System.Security.Claims;
 using System.Text;
 using EcoFleetLogistics.Application.Authentication.Common;
-using EcoFleetLogistics.Application.Common.Interfaces;
-using EcoFleetLogistics.Domain.User;
+using EcoFleetLogistics.Application.Common.Authentication.Interfaces;
+using EcoFleetLogistics.Domain.Users;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace EcoFleetLogistics.Infrastructure.Persistence.Authentication;
+namespace EcoFleetLogistics.Infrastructure.Authentication;
 
 public class JwtTokenGenerator : IJwtTokenGenerator
 {

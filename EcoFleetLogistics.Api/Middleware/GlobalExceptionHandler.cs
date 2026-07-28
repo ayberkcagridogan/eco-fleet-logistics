@@ -33,6 +33,11 @@ public class GlobalExceptionHandler : IExceptionHandler
                 invalidOpEx.Message, 
                 "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"
                 ),
+            ArgumentException argEx => (
+                StatusCodes.Status400BadRequest,
+                "Bad Request",
+                argEx.Message,
+                "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1"),
             ValidationException validationEx => (
                 StatusCodes.Status400BadRequest, 
                 "Validation Error", "One or more validation failures occurred.",
