@@ -46,7 +46,7 @@ public class GlobalExceptionHandler : IExceptionHandler
             UnauthorizedAccessException unauthorizedAccessException => (
                 StatusCodes.Status401Unauthorized,
                 "Unauthorized",
-                "exception.Message",
+                unauthorizedAccessException.Message,
                 "https://datatracker.ietf.org/doc/html/rfc7235#section-3.1"
             ),
             _ => (

@@ -21,7 +21,6 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
         public async Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
             return await _context.RefreshTokens
-                                    .AsNoTracking()
                                     .FirstAsync(rt => rt.Token == refreshToken, cancellationToken);
         }
     }
