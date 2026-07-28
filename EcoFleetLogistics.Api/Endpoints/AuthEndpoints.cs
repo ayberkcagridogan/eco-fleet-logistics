@@ -1,7 +1,10 @@
+using System.Security.Claims;
 using EcoFleetLogistics.Application.Authentication.Commands.Login;
+using EcoFleetLogistics.Application.Authentication.Commands.Logout;
 using EcoFleetLogistics.Application.Authentication.Commands.RefreshToken;
 using EcoFleetLogistics.Application.Authentication.Commands.Register;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EcoFleetLogistics.Api.Endpoints;
 
@@ -37,9 +40,25 @@ public static class AuthEndpoints
             })
             .WithName("RefreshToken")
             .WithOpenApi();
+
+            group.MapPost("logout", async (
+                [FromBody] LogoutRequest request,
+                ClaimsPrincipal user,
+                ISender sender,
+                CancellationToken cancellationToken) =>
+            {
+                var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                
+                if(!Guid.TryParse(userIdClaim, out var userId))
+                    return Results.Unauthorized();
+                
+                var command = new LogoutCommand(userId, request.RefreshToken);
+
+                await sender.Send(command, cancellationToken);
+
+                return Results.Ok(new { message = "The session was successfully closed."});
+            })
+            .RequireAuthorization()
+            .WithName("Logout");
         }
-
-        
-
-
 }
