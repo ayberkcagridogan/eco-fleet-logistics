@@ -28,13 +28,11 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
         public async Task AddAsync(Shipment shipment, CancellationToken cancellationToken = default)
         {
             await _context.Shipments.AddAsync(shipment, cancellationToken);
-            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateAsync(Shipment shipment , CancellationToken cancellationToken = default)
+        public void Update(Shipment shipment , CancellationToken cancellationToken = default)
         {
             _context.Shipments.Update(shipment);
-            await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<bool> ExistsByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default)

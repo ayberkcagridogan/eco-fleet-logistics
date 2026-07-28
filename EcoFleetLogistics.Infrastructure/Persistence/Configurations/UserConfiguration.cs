@@ -1,4 +1,4 @@
-using EcoFleetLogistics.Domain.User;
+using EcoFleetLogistics.Domain.Users;
 using EcoFleetLogistics.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

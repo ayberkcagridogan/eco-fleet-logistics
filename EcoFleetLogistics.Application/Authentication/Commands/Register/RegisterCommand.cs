@@ -1,10 +1,9 @@
-using System.ComponentModel;
 using EcoFleetLogistics.Application.Authentication.Common;
-using EcoFleetLogistics.Application.Common.Interfaces;
+using EcoFleetLogistics.Application.Common.Authentication.Interfaces;
+using EcoFleetLogistics.Application.Common.Interfaces.Authentication;
+using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Application.Common.Persistence;
-using EcoFleetLogistics.Domain.User;
-using EcoFleetLogistics.Domain.User.Enums;
-using EcoFleetLogistics.Domain.ValueObjects;
+using EcoFleetLogistics.Domain.Users;
 using MediatR;
 
 namespace EcoFleetLogistics.Application.Authentication.Commands.Register;
@@ -22,20 +21,24 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Authentic
 {
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly IJwtTokenGenerator _jwtTokenGenerator;
+    private readonly ITokenService _tokenService;
+    private readonly IUnitOfWork _unityOfWork;
 
-    public RegisterCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, IJwtTokenGenerator jwtTokenGenerator)
+    public RegisterCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnitOfWork unitOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
-        _jwtTokenGenerator = jwtTokenGenerator;
+        _tokenService = tokenService;
+        _unityOfWork = unitOfWork;
     }
     public async Task<AuthenticationResult> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var passwordHash = _passwordHasher.HashPassword(request.Password);
         var user = User.Create(request.FirstName, request.LastName, request.Email, passwordHash, User.ResolveRole(request.Role));
-        var token = _jwtTokenGenerator.GenerateToken(user);
+
         await _userRepo.AddAsync(user, cancellationToken);
+        var tokenResult = await _tokenService.GenerateAndSaveTokensAsync(user, cancellationToken);
+        await _unityOfWork.SaveChangesAsync(cancellationToken);
         
         return new AuthenticationResult(
             user.Id,
@@ -43,6 +46,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Authentic
             user.LastName,
             user.Email.Value,
             user.Role.ToString(),
-            token);
+            tokenResult.AccessToken,
+            tokenResult.RefreshToken);
     }
 }

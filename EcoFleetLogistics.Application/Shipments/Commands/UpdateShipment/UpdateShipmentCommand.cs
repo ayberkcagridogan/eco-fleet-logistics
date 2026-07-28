@@ -1,3 +1,4 @@
+using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Application.Common.Persistence;
 using MediatR;
 
@@ -12,10 +13,12 @@ public record UpdateShipmentCommand(
 public class UpdateShipmentCommandHandler : IRequestHandler<UpdateShipmentCommand, bool>
 {
     private readonly IShipmentRepo _shipmentRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateShipmentCommandHandler(IShipmentRepo shipmentRepo)
+    public UpdateShipmentCommandHandler(IShipmentRepo shipmentRepo, IUnitOfWork unitOfWork)
     {
         _shipmentRepo = shipmentRepo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<bool> Handle(UpdateShipmentCommand request, CancellationToken cancellationToken)
@@ -26,8 +29,9 @@ public class UpdateShipmentCommandHandler : IRequestHandler<UpdateShipmentComman
             return false;
 
         shipment.UpdateDetails(request.ReceiverName, request.DestinationAddress);
-        await _shipmentRepo.UpdateAsync(shipment, cancellationToken);
-
+         _shipmentRepo.Update(shipment, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        
         return true;
     }
 }

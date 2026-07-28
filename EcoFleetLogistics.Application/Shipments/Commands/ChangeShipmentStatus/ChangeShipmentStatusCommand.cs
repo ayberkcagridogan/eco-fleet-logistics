@@ -1,4 +1,5 @@
 
+using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Application.Common.Persistence;
 using EcoFleetLogistics.Domain.Shipments.Enums;
 using MediatR;
@@ -10,10 +11,12 @@ public record ChangeShipmentStatusCommand(Guid Id, ShipmentStatus NewStatus) : I
 public class ChangeShipmentStatusCommandHandler : IRequestHandler<ChangeShipmentStatusCommand, bool>
 {
     private readonly IShipmentRepo _shipmentRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public ChangeShipmentStatusCommandHandler(IShipmentRepo shipmentRepo)
+    public ChangeShipmentStatusCommandHandler(IShipmentRepo shipmentRepo, IUnitOfWork unitOfWork)
     {
         _shipmentRepo = shipmentRepo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<bool> Handle(ChangeShipmentStatusCommand request, CancellationToken cancellationToken)
@@ -36,7 +39,8 @@ public class ChangeShipmentStatusCommandHandler : IRequestHandler<ChangeShipment
             default:
                 throw new InvalidOperationException($"Unsupported status transition to {request.NewStatus}.");
         }
-        await _shipmentRepo.UpdateAsync(shipment, cancellationToken);
+        _shipmentRepo.Update(shipment, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }
 }

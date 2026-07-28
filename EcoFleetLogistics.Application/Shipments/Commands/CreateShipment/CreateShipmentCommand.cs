@@ -1,3 +1,4 @@
+using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Application.Common.Persistence;
 using EcoFleetLogistics.Domain.Shipments;
 using MediatR;
@@ -14,10 +15,12 @@ public record CreateShipmentCommand(
 public class CreateShipmentCommandHandler : IRequestHandler<CreateShipmentCommand, Guid>
 {
     private readonly IShipmentRepo _shipmentRepo;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public CreateShipmentCommandHandler(IShipmentRepo shipmentRepo)
+    public CreateShipmentCommandHandler(IShipmentRepo shipmentRepo, IUnitOfWork unitOfWork)
     {
         _shipmentRepo = shipmentRepo;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Guid> Handle(CreateShipmentCommand request, CancellationToken cancellationToken)
@@ -31,6 +34,7 @@ public class CreateShipmentCommandHandler : IRequestHandler<CreateShipmentComman
         );
 
         await _shipmentRepo.AddAsync(shipment, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
         return shipment.Id;
     }
 } 
