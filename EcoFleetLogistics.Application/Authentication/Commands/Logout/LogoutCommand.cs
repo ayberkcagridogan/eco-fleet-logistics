@@ -12,12 +12,12 @@ namespace EcoFleetLogistics.Application.Authentication.Commands.Logout
     public class LogoutCommandHandler : IRequestHandler<LogoutCommand>
     {
         private readonly IRefreshTokenRepo _refreshTokenRepo;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnityOfWork _unityOfWork;
 
-        public LogoutCommandHandler(IRefreshTokenRepo refreshTokenRepo, IUnitOfWork unitOfWork)
+        public LogoutCommandHandler(IRefreshTokenRepo refreshTokenRepo, IUnityOfWork unityOfWork)
         {
             _refreshTokenRepo = refreshTokenRepo;
-            _unitOfWork = unitOfWork;
+            _unityOfWork = unityOfWork;
         }
         public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
@@ -28,7 +28,7 @@ namespace EcoFleetLogistics.Application.Authentication.Commands.Logout
 
             token.Revoke();
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _unityOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

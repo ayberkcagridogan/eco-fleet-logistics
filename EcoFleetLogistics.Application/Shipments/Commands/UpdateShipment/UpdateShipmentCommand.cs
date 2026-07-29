@@ -13,12 +13,12 @@ public record UpdateShipmentCommand(
 public class UpdateShipmentCommandHandler : IRequestHandler<UpdateShipmentCommand, bool>
 {
     private readonly IShipmentRepo _shipmentRepo;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUnityOfWork _unityOfWork;
 
-    public UpdateShipmentCommandHandler(IShipmentRepo shipmentRepo, IUnitOfWork unitOfWork)
+    public UpdateShipmentCommandHandler(IShipmentRepo shipmentRepo, IUnityOfWork unityOfWork)
     {
         _shipmentRepo = shipmentRepo;
-        _unitOfWork = unitOfWork;
+        _unityOfWork = unityOfWork;
     }
 
     public async Task<bool> Handle(UpdateShipmentCommand request, CancellationToken cancellationToken)
@@ -30,7 +30,7 @@ public class UpdateShipmentCommandHandler : IRequestHandler<UpdateShipmentComman
 
         shipment.UpdateDetails(request.ReceiverName, request.DestinationAddress);
          _shipmentRepo.Update(shipment, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unityOfWork.SaveChangesAsync(cancellationToken);
         
         return true;
     }

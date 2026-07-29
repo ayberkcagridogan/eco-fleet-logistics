@@ -1,3 +1,4 @@
+using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Users.Enums;
 using EcoFleetLogistics.Domain.ValueObjects;
 
@@ -10,14 +11,19 @@ public class User
     public Email Email { get; private set; }
     public string PasswordHash {get; private set;}
     public UserRole Role { get; private set; }
-    public Guid CompanyId { get; private set; }
     public DateTime CreateAt { get; private set; }
+
+    public Guid CompanyId { get; private set; }
+    public Company Company { get; private set; }
+  
+
     private User() // Parameterless constructor for EF Core
     {
         FirstName = null!;
         LastName = null!;
         Email = null!;
         PasswordHash = null!;
+        Company = null!;
     }
     
     private User(Guid id, string firstName, string lastName, Email email, string passwordHash, UserRole role, Guid companyId)

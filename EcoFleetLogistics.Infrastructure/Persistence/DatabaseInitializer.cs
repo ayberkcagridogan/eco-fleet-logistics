@@ -1,4 +1,5 @@
 using EcoFleetLogistics.Application.Common.Authentication.Interfaces;
+using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Shipments;
 using EcoFleetLogistics.Domain.Users;
 using EcoFleetLogistics.Domain.Users.Enums;
@@ -33,7 +34,8 @@ public static class DatabaseInitializer
             {
                 logger.LogInformation("Development environment detected. Checking seed data...");
                 var passHasher = services.GetRequiredService<IPasswordHasher>();
-                await SeedDataAsync(context, logger, passHasher);
+                await SeedShipmentsDataAsync(context, logger);
+                await SeedUsersDataAsync(context, logger, passHasher);
             }
         }
         catch(Exception ex)
@@ -43,7 +45,7 @@ public static class DatabaseInitializer
         }
     }
 
-    private static async Task SeedDataAsync(AppDbContext context, ILogger<AppDbContext> logger, IPasswordHasher passwordHasher)
+    private static async Task SeedShipmentsDataAsync(AppDbContext context, ILogger<AppDbContext> logger)
     {
         if (!await context.Shipments.AnyAsync())
         {
@@ -66,31 +68,44 @@ public static class DatabaseInitializer
                 )
             );
 
-            if (!await context.Users.AnyAsync())
-            {
-                logger.LogInformation("User not found in the database. Creating default SuperAdmin...");
-
-                var adminUser = User.Create(
-                    firstName: "System",
-                    lastName: "Admin",
-                    email: "admin@ecofleet.com",
-                    passwordHash: passwordHasher.HashPassword("Admin123!"), 
-                    role: UserRole.Admin,
-                    companyId: Guid.NewGuid()
-                );
-
-                await context.Users.AddAsync(adminUser);
-                await context.SaveChangesAsync();
-
-                logger.LogInformation("The default SuperAdmin account was successfully created: admin@ecofleet.com");
-            }
-
+           
             await context.SaveChangesAsync();
             logger.LogInformation("Seed data has been successfully saved.");
         }
         else
         {
-            logger.LogInformation("Data already exists in the database; the seeding step was skipped.");
+            logger.LogInformation("Shipment data already exists in the database; the seeding step was skipped.");
+        }
+    }
+    private static async Task SeedUsersDataAsync(AppDbContext context, ILogger<AppDbContext> logger, IPasswordHasher passwordHasher)
+    {
+        if (!await context.Users.AnyAsync())
+        {
+            logger.LogInformation("User not found in the database. Creating default SuperAdmin...");
+
+            var adminCompany = Company.Create(
+                name: "EcoFleet Headquarters",
+                taxNumber: "9999999999" // Varsa diğer zorunlu alanlar
+            );
+
+            await context.Companies.AddAsync(adminCompany);
+
+            var adminUser = User.Create(
+                firstName: "System",
+                lastName: "Admin",
+                email: "admin@ecofleet.com",
+                passwordHash: passwordHasher.HashPassword("Admin123!"), 
+                role: UserRole.Admin,
+                companyId: adminCompany.Id
+            );
+
+            await context.Users.AddAsync(adminUser);
+            await context.SaveChangesAsync();
+            logger.LogInformation("The default SuperAdmin account was successfully created: admin@ecofleet.com");
+        }
+        else
+        {
+            logger.LogInformation("User data already exists in the database; the seeding step was skipped.");
         }
     }
 }

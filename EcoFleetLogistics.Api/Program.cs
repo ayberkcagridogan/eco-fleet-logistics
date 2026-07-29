@@ -1,18 +1,15 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using EcoFleetLogistics.Infrastructure;
 using EcoFleetLogistics.Api.Middleware;
 using EcoFleetLogistics.Application;
 using Serilog;
 using EcoFleetLogistics.Infrastructure.Persistence;
 using EcoFleetLogistics.Api.Endpoints;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using EcoFleetLogistics.Api.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 #region Services & Dependencies (DI)
-builder.Host.UseCustemSerilog();
+builder.Host.UseCustomSerilog();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 

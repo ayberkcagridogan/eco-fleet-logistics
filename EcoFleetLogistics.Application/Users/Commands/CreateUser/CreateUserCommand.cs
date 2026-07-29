@@ -23,14 +23,14 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Creat
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
-    private readonly IUnitOfWork _unityOfWork;
+    private readonly IUnityOfWork _unityOfWork;
 
-    public CreateUserCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnitOfWork unitOfWork)
+    public CreateUserCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnityOfWork unityOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
-        _unityOfWork = unitOfWork;
+        _unityOfWork = unityOfWork;
     }
     public async Task<CreateUserResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
