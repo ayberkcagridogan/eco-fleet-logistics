@@ -10,12 +10,12 @@ public record DeleteShipmentCommand(Guid Id) : IRequest<bool>;
 public class DeleteShipmentCommandHandler : IRequestHandler<DeleteShipmentCommand, bool>
 {
     private readonly IShipmentRepo _shipmentRepo;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUnityOfWork _unityOfWork;
 
-    public DeleteShipmentCommandHandler(IShipmentRepo shipmentRepo, IUnitOfWork unitOfWork)
+    public DeleteShipmentCommandHandler(IShipmentRepo shipmentRepo, IUnityOfWork unityOfWork)
     {
         _shipmentRepo = shipmentRepo;
-        _unitOfWork = unitOfWork;
+        _unityOfWork = unityOfWork;
     }
     public async Task<bool> Handle(DeleteShipmentCommand request, CancellationToken cancellationToken)
     {
@@ -26,7 +26,7 @@ public class DeleteShipmentCommandHandler : IRequestHandler<DeleteShipmentComman
 
         shipment.Delete();
         _shipmentRepo.Update(shipment, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unityOfWork.SaveChangesAsync(cancellationToken);
         
         return true;
     }

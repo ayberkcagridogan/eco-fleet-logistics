@@ -17,18 +17,18 @@ public record RefreshTokenCommand(
 public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, AuthenticationResult>
 {
     private readonly IUserRepo _userRepo;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUnityOfWork _unityOfWork;
     private readonly ITokenService _tokenService;
     private readonly IRefreshTokenRepo _refreshTokenRepo;
 
     public RefreshTokenCommandHandler(
         IUserRepo userRepo,
-        IUnitOfWork unitOfWork,
+        IUnityOfWork unityOfWork,
         ITokenService tokenService,
         IRefreshTokenRepo refreshTokenRepo)
     {
         _userRepo = userRepo;
-        _unitOfWork = unitOfWork;
+        _unityOfWork = unityOfWork;
         _tokenService = tokenService;
         _refreshTokenRepo = refreshTokenRepo;
     }
@@ -46,7 +46,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
 
         existingToken.Revoke();
         var tokenResult = await _tokenService.GenerateAndSaveTokensAsync(user, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unityOfWork.SaveChangesAsync(cancellationToken);
 
         return new AuthenticationResult(
             user.Id,

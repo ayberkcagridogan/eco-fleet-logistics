@@ -2,7 +2,7 @@ using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 
 namespace EcoFleetLogistics.Infrastructure.Persistence
 {
-    public class UnityOfWork : IUnitOfWork
+    public class UnityOfWork : IUnityOfWork
     {
         private readonly AppDbContext _context;
 

@@ -14,14 +14,14 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUnityOfWork _unityOfWork;
 
-    public LoginCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnitOfWork unitOfWork)
+    public LoginCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnityOfWork unityOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
-        _unitOfWork = unitOfWork;
+        _unityOfWork = unityOfWork;
     }
     public async Task<AuthenticationResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -35,7 +35,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
 
         var tokenResult = await _tokenService.GenerateAndSaveTokensAsync(user, cancellationToken);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await _unityOfWork.SaveChangesAsync(cancellationToken);
 
         return new AuthenticationResult(
             user.Id,

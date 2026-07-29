@@ -7,17 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
-namespace EcoFleetLogistics.Infrastructure;
-
 using EcoFleetLogistics.Application.Authentication.Common;
 using EcoFleetLogistics.Application.Common.Interfaces;
 using EcoFleetLogistics.Application.Common.Interfaces.Authentication;
 using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Infrastructure.Services;
-using Serilog;public static class DependencyInjection
-{
-    public static IHostBuilder UseCustemSerilog(this IHostBuilder host)
+using Serilog;
+
+namespace EcoFleetLogistics.Infrastructure;
+public static class DependencyInjection {
+    public static IHostBuilder UseCustomSerilog(this IHostBuilder host)
     {
         return host.UseSerilog((context, services, configuration) =>
         {
@@ -28,13 +27,15 @@ using Serilog;public static class DependencyInjection
                 .Enrich.WithMachineName()
                 .Enrich.WithThreadId()
                 .Enrich.WithProperty("Application", "EcoFleet.Api")
-                .Enrich.WithProperty("Enviroment", context.HostingEnvironment.EnvironmentName)
+                .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
                 .WriteTo.Console()
                 .WriteTo.Seq(context.Configuration["Seq:ServerUrl"] ?? "http://localhost:5341");
         });
     }
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddHttpContextAccessor();
+        
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
             b => b.MigrationsAssembly("EcoFleetLogistics.Infrastructure")));        
@@ -44,13 +45,12 @@ using Serilog;public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
            
-           
         services.AddScoped<IShipmentRepo, ShipmentRepo>();
         services.AddScoped<IUserRepo, UserRepo>();
         services.AddScoped<IRefreshTokenRepo, RefreshTokenRepo>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<ITokenService, TokenService>();
-        services.AddScoped<IUnitOfWork, UnityOfWork>();
+        services.AddScoped<IUnityOfWork, UnityOfWork>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         
         return services;
