@@ -2,7 +2,8 @@ namespace EcoFleetLogistics.Domain.Users.Enums;
 
 public enum UserRole
 {
-    User = 1,
-    Dispatcher = 2,
-    Admin = 3
+    Admin = 1,
+    FleetManager = 2,
+    Driver = 3,
+    Customer = 4
 }
