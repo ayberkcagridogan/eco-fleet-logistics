@@ -7,6 +7,7 @@ using EcoFleetLogistics.Application.Shipments.Commands.CreateShipment;
 using EcoFleetLogistics.Application.Shipments.Commands.DeleteShipment;
 using EcoFleetLogistics.Application.Shipments.Commands.UpdateShipment;
 using EcoFleetLogistics.Application.Shipments.Queries.GetShipmentById;
+using EcoFleetLogistics.Domain.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,8 +18,7 @@ namespace EcoFleetLogistics.Api.Endpoints
         public static void MapShipmentEndPoints(this IEndpointRouteBuilder app)
         {
             var group = app.MapGroup("api/shipments")
-                    .WithTags("Shipments")
-                    .AllowAnonymous();
+                    .WithTags("Shipments");
         
 
             //Create Shipment Endpoint
@@ -32,6 +32,7 @@ namespace EcoFleetLogistics.Api.Endpoints
                 return Results.Created($"/api/shipments/{shipmentId}", new { Id = shipmentId });
             })
             .WithName("CreateShipment")
+            .RequireAuthorization(Policies.ManagementOnly)
             .WithOpenApi();
 
 
@@ -48,6 +49,7 @@ namespace EcoFleetLogistics.Api.Endpoints
                     : Results.NotFound(new {Message = $"Shipment with Id {id} not found."});
             })
             .WithName("GetShipmentById")
+            .RequireAuthorization()
             .WithOpenApi();
 
 
@@ -65,6 +67,7 @@ namespace EcoFleetLogistics.Api.Endpoints
                     : Results.NotFound(new {Message = $"Shipment with Id {id} not found."});
             })
             .WithName("ChangeShipmentStatus")
+            .RequireAuthorization(Policies.ManagementOnly)
             .WithOpenApi();
 
 
@@ -82,6 +85,7 @@ namespace EcoFleetLogistics.Api.Endpoints
                     : Results.NotFound(new { Message = $"Shipment with Id {id} not found." });
             })
             .WithName("UpdateShipment")
+            .RequireAuthorization(Policies.ManagementOnly)
             .WithOpenApi();
 
 
@@ -98,9 +102,8 @@ namespace EcoFleetLogistics.Api.Endpoints
                     : Results.NotFound(new { Message = $"Shipment with ID '{id}' was not found." });
             })
             .WithName("DeleteShipment")
+            .RequireAuthorization(Policies.ManagementOnly)
             .WithOpenApi();
-
-
         }
     }
 }

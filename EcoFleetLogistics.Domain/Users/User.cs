@@ -30,7 +30,7 @@ public class User
         CreateAt = DateTime.UtcNow;
     }
 
-    public static User Create(string firstName, string lastName, string email, string passwordHash, UserRole role = UserRole.User)
+    public static User Create(string firstName, string lastName, string email, string passwordHash, UserRole role = UserRole.Customer)
     {
          if (string.IsNullOrWhiteSpace(firstName))
                 throw new ArgumentException("First Name cannot be empty.", nameof(firstName));
@@ -52,7 +52,7 @@ public class User
     public static UserRole ResolveRole(string? role)
     {
         if(string.IsNullOrWhiteSpace(role))
-           return UserRole.User;
+           return UserRole.Customer;
         
         if(!Enum.TryParse<UserRole>(role, ignoreCase: true, out var parsedRole))
             throw new ArgumentException("Invalid role specified. Valid roles are: User, Admin vs.", nameof(role));
