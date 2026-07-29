@@ -11,8 +11,10 @@ using Microsoft.Extensions.Hosting;
 namespace EcoFleetLogistics.Infrastructure;
 
 using EcoFleetLogistics.Application.Authentication.Common;
+using EcoFleetLogistics.Application.Common.Interfaces;
 using EcoFleetLogistics.Application.Common.Interfaces.Authentication;
 using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
+using EcoFleetLogistics.Infrastructure.Services;
 using Serilog;public static class DependencyInjection
 {
     public static IHostBuilder UseCustemSerilog(this IHostBuilder host)
@@ -49,6 +51,7 @@ using Serilog;public static class DependencyInjection
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUnitOfWork, UnityOfWork>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
         
         return services;
     }
