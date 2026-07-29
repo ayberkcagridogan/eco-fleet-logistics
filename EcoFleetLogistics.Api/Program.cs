@@ -54,6 +54,7 @@ app.UseAuthorization();
 
 app.MapShipmentEndPoints();
 app.MapAutEndPoints();
+app.MapUsersEndpoints();
 await app.MigrateDatabaseAsync();
 
 

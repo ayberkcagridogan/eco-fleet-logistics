@@ -17,7 +17,7 @@ namespace EcoFleetLogistics.Api.Endpoints
     {
         public static void MapShipmentEndPoints(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("api/shipments")
+            var group = app.MapGroup("api/v1/shipments")
                     .WithTags("Shipments");
         
 

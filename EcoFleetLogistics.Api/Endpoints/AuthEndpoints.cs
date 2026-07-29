@@ -13,19 +13,9 @@ public static class AuthEndpoints
 {
     public static void MapAutEndPoints(this IEndpointRouteBuilder app)
     {
-            var group = app.MapGroup("api/auth")
+            var group = app.MapGroup("api/v1/auth")
                             .WithTags("Authentication");
-        
-            group.MapPost("/register", async (RegisterCommand command, ISender meditor, CancellationToken ct) =>
-            {
-                var result = await meditor.Send(command, ct);
-                return Results.Created($"/api/users/{result.Id}", result);
-            })
-            .WithName("Register")
-            .RequireAuthorization(Policies.ManagementOnly)
-            .WithOpenApi();
-
-            
+                    
             group.MapPost("/login", async (LoginCommand command, ISender mediator, CancellationToken ct) =>
             {
                 var result = await mediator.Send(command, ct);

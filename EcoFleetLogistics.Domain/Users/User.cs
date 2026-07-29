@@ -10,6 +10,7 @@ public class User
     public Email Email { get; private set; }
     public string PasswordHash {get; private set;}
     public UserRole Role { get; private set; }
+    public Guid CompanyId { get; private set; }
     public DateTime CreateAt { get; private set; }
     private User() // Parameterless constructor for EF Core
     {
@@ -19,7 +20,7 @@ public class User
         PasswordHash = null!;
     }
     
-    private User(Guid id, string firstName, string lastName, Email email, string passwordHash, UserRole role)
+    private User(Guid id, string firstName, string lastName, Email email, string passwordHash, UserRole role, Guid companyId)
     {
         Id = id;
         FirstName = firstName;
@@ -27,10 +28,11 @@ public class User
         Email = email;
         PasswordHash = passwordHash;
         Role = role;
+        CompanyId = companyId;
         CreateAt = DateTime.UtcNow;
     }
 
-    public static User Create(string firstName, string lastName, string email, string passwordHash, UserRole role = UserRole.Customer)
+    public static User Create(string firstName, string lastName, string email, string passwordHash, Guid companyId, UserRole role = UserRole.Customer)
     {
          if (string.IsNullOrWhiteSpace(firstName))
                 throw new ArgumentException("First Name cannot be empty.", nameof(firstName));
@@ -46,7 +48,7 @@ public class User
             
         var emeilValueObject = Email.Create(email);
             
-        return new User(Guid.NewGuid(), firstName, lastName, emeilValueObject, passwordHash, role);
+        return new User(Guid.NewGuid(), firstName, lastName, emeilValueObject, passwordHash, role, companyId);
     }
 
     public static UserRole ResolveRole(string? role)

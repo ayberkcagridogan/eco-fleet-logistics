@@ -1,4 +1,7 @@
+using EcoFleetLogistics.Application.Common.Authentication.Interfaces;
 using EcoFleetLogistics.Domain.Shipments;
+using EcoFleetLogistics.Domain.Users;
+using EcoFleetLogistics.Domain.Users.Enums;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,15 +24,16 @@ public static class DatabaseInitializer
             var context = services.GetRequiredService<AppDbContext>();
             logger.LogInformation("Database connection is being checked and migrations are being applied...");
 
-            // Veritabanı yoksa oluşturur VE uygulanmamış tüm migration'ları çalıştırır
-            await context.Database.MigrateAsync();
+            if(context.Database.IsRelational())
+                await context.Database.MigrateAsync();
 
             logger.LogInformation("Database migration operations have been successfully completed.");
 
             if (env.IsDevelopment())
             {
                 logger.LogInformation("Development environment detected. Checking seed data...");
-                await SeedDataAsync(context, logger);
+                var passHasher = services.GetRequiredService<IPasswordHasher>();
+                await SeedDataAsync(context, logger, passHasher);
             }
         }
         catch(Exception ex)
@@ -39,7 +43,7 @@ public static class DatabaseInitializer
         }
     }
 
-    private static async Task SeedDataAsync(AppDbContext context, ILogger<AppDbContext> logger)
+    private static async Task SeedDataAsync(AppDbContext context, ILogger<AppDbContext> logger, IPasswordHasher passwordHasher)
     {
         if (!await context.Shipments.AnyAsync())
         {
@@ -61,6 +65,25 @@ public static class DatabaseInitializer
                     10
                 )
             );
+
+            if (!await context.Users.AnyAsync())
+            {
+                logger.LogInformation("User not found in the database. Creating default SuperAdmin...");
+
+                var adminUser = User.Create(
+                    firstName: "System",
+                    lastName: "Admin",
+                    email: "admin@ecofleet.com",
+                    passwordHash: passwordHasher.HashPassword("Admin123!"), 
+                    role: UserRole.Admin,
+                    companyId: Guid.NewGuid()
+                );
+
+                await context.Users.AddAsync(adminUser);
+                await context.SaveChangesAsync();
+
+                logger.LogInformation("The default SuperAdmin account was successfully created: admin@ecofleet.com");
+            }
 
             await context.SaveChangesAsync();
             logger.LogInformation("Seed data has been successfully saved.");
