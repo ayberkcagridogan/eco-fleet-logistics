@@ -1,5 +1,5 @@
-using System.Net.Cache;
 using EcoFleetLogistics.Application.Common.Persistence;
+using EcoFleetLogistics.Application.Users.Commands.CreateUser;
 using EcoFleetLogistics.Domain.Users.Enums;
 using EcoFleetLogistics.Domain.ValueObjects;
 using FluentValidation;
@@ -7,7 +7,7 @@ using FluentValidation;
 namespace EcoFleetLogistics.Application.Authentication.Commands.Register;
 
 
-public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
+public class RegisterCommandValidator : AbstractValidator<CreateUserCommand>
 {
     private readonly IUserRepo _userRepo;
 
