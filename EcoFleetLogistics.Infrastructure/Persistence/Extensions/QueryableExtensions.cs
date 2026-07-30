@@ -10,8 +10,8 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Extensions
         public static IQueryable<TEntity> IgnoreTenantFilterIf<TEntity>(
             this IQueryable<TEntity> query, 
             bool condition) where TEntity : class
-    {
-        return condition ? query.IgnoreQueryFilters() : query;
-    }
+        {
+            return condition ? query.IgnoreQueryFilters() : query;
+        }
     }
 }

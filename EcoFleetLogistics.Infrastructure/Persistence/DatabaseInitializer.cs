@@ -34,8 +34,13 @@ public static class DatabaseInitializer
             {
                 logger.LogInformation("Development environment detected. Checking seed data...");
                 var passHasher = services.GetRequiredService<IPasswordHasher>();
-                await SeedShipmentsDataAsync(context, logger);
-                await SeedUsersDataAsync(context, logger, passHasher);
+                
+                var (adminCompanyId, adminUserId) = await SeedUsersDataAsync(context, logger, passHasher);
+
+                if (adminCompanyId.HasValue && adminUserId.HasValue)
+                {
+                    await SeedShipmentsDataAsync(context, logger, adminCompanyId.Value, adminUserId.Value);
+                }
             }
         }
         catch(Exception ex)
@@ -45,29 +50,31 @@ public static class DatabaseInitializer
         }
     }
 
-    private static async Task SeedShipmentsDataAsync(AppDbContext context, ILogger<AppDbContext> logger)
+    private static async Task SeedShipmentsDataAsync(AppDbContext context, ILogger<AppDbContext> logger, Guid companyId, Guid createdById)
     {
         if (!await context.Shipments.AnyAsync())
         {
             logger.LogInformation("The Shipment table is empty; sample data is being added...");
 
-            context.Shipments.AddRange(
-                Shipment.Create( 
-                    "TRK-1001", 
-                    "Amazon", 
-                    "Hans Zimmer",
-                    "Logistics Str 1, Stuttgart, Germany",
-                    10
-                ),
-                Shipment.Create( 
-                    "TRK-1002", 
-                    "Zalando", 
-                    "Gerd Muller",
-                    "Daimler Str 1, Stuttgart, Germany",
-                    10
-                )
+            var shipment1 = Shipment.Create(
+                senderName: "Amazon",
+                receiverName: "Hans Zimmer",
+                destinationAddress: "Logistics Str 1, Stuttgart, Germany",
+                weight: 10,
+                companyId: companyId,
+                createdById: createdById
             );
 
+            var shipment2 = Shipment.Create(
+                senderName: "Zalando",
+                receiverName: "Gerd Muller",
+                destinationAddress: "Daimler Str 1, Stuttgart, Germany",
+                weight: 15,
+                companyId: companyId,
+                createdById: createdById
+            );
+
+            context.Shipments.AddRange(shipment1, shipment2);
            
             await context.SaveChangesAsync();
             logger.LogInformation("Seed data has been successfully saved.");
@@ -77,7 +84,7 @@ public static class DatabaseInitializer
             logger.LogInformation("Shipment data already exists in the database; the seeding step was skipped.");
         }
     }
-    private static async Task SeedUsersDataAsync(AppDbContext context, ILogger<AppDbContext> logger, IPasswordHasher passwordHasher)
+    private static async Task<(Guid? CompanyId, Guid? UserId)> SeedUsersDataAsync(AppDbContext context, ILogger<AppDbContext> logger, IPasswordHasher passwordHasher)
     {
         if (!await context.Users.AnyAsync())
         {
@@ -102,10 +109,15 @@ public static class DatabaseInitializer
             await context.Users.AddAsync(adminUser);
             await context.SaveChangesAsync();
             logger.LogInformation("The default SuperAdmin account was successfully created: admin@ecofleet.com");
+
+            return (adminCompany.Id, adminUser.Id);
         }
         else
         {
             logger.LogInformation("User data already exists in the database; the seeding step was skipped.");
+
+            var existingUser = await context.Users.AsNoTracking().FirstOrDefaultAsync();
+            return (existingUser?.CompanyId, existingUser?.Id);
         }
     }
 }

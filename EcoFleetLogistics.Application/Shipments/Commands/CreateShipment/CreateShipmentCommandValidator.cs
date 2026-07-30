@@ -1,20 +1,17 @@
+using System.Collections.Concurrent;
 using EcoFleetLogistics.Application.Common.Persistence;
+using EcoFleetLogistics.Domain.Users.Enums;
 using FluentValidation;
 
 namespace EcoFleetLogistics.Application.Shipments.Commands.CreateShipment;
 
 public class CreateShipmentCommandValidator : AbstractValidator<CreateShipmentCommand>
 {
-    private readonly IShipmentRepo _shipmentRepo;
-    public CreateShipmentCommandValidator(IShipmentRepo shipmentRepo)
-    {
-        _shipmentRepo = shipmentRepo;
+    private readonly IUserRepo _userRepo;
 
-        RuleFor(x => x.TrackingNumber)
-            .NotEmpty().WithMessage("Tracking number is required.")
-            .MinimumLength(5).WithMessage("Tracking number must be at least 5 characters long.")
-            .MaximumLength(50).WithMessage("Tracking number cannot exceed 50 characters.")
-            .MustAsync(BeUniqueTrackingNumber).WithMessage("A shipment with this tracking number already exists.");
+    public CreateShipmentCommandValidator(IUserRepo userRepo)
+    {
+        _userRepo = userRepo;
 
         RuleFor(x => x.SenderName)
             .NotEmpty().WithMessage("Sender name is required.")
@@ -33,10 +30,19 @@ public class CreateShipmentCommandValidator : AbstractValidator<CreateShipmentCo
         
         RuleFor(x => x.Weight)
             .GreaterThan(0).WithMessage("Weight must be greater than 0 kg.");
+
+        RuleFor(x => x.DriverId)
+            .MustAsync(BeValidDriverAsync)
+            .When(x => x.DriverId.HasValue)
+            .WithMessage("The assigned user was not found or does not have the 'Driver' role.");
     }
 
-    private async Task<bool> BeUniqueTrackingNumber(string trackingNumber, CancellationToken cancellationToken)
+    private async Task<bool> BeValidDriverAsync(Guid? driverId, CancellationToken cancellationToken)
     {
-        return !await _shipmentRepo.ExistsByTrackingNumberAsync(trackingNumber, cancellationToken);
+        if(!driverId.HasValue)
+            return true;
+        var driver = await _userRepo.GetByIdAsync(driverId.Value,cancellationToken);
+
+        return driver != null && driver.Role == UserRole.Driver;
     }
 }

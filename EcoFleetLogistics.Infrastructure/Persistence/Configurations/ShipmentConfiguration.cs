@@ -39,6 +39,21 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
                     .HasConversion<string>()
                     .IsRequired();
         
+        builder.HasOne(s => s.Company)
+            .WithMany()
+            .HasForeignKey(s => s.CompanyId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasOne(s => s.CreatedBy)
+            .WithMany()
+            .HasForeignKey(s => s.CreatedById)
+            .OnDelete(DeleteBehavior.Restrict);
+        
+        builder.HasOne(s => s.Driver)
+            .WithMany()
+            .HasForeignKey(s => s.DriverId)
+            .OnDelete(DeleteBehavior.Restrict);
+        
         builder.HasQueryFilter(s => !s.IsDeleted);
     }
 }

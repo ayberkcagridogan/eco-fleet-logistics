@@ -6,7 +6,7 @@ using MediatR;
 
 namespace EcoFleetLogistics.Application.Shipments.Commands.ChangeShipmentStatus;
 
-public record ChangeShipmentStatusCommand(Guid Id, ShipmentStatus NewStatus) : IRequest<bool>;
+public record ChangeShipmentStatusCommand(Guid Id, ShipmentStatus NewStatus, Guid? DriverId = null) : IRequest<bool>;
 
 public class ChangeShipmentStatusCommandHandler : IRequestHandler<ChangeShipmentStatusCommand, bool>
 {
@@ -27,11 +27,14 @@ public class ChangeShipmentStatusCommandHandler : IRequestHandler<ChangeShipment
         
         switch (request.NewStatus)
         {
+            case ShipmentStatus.Assigned:
+                shipment.AssignDriver(request.DriverId!.Value);
+                break;
             case ShipmentStatus.InTransit:
                 shipment.StartTransit();
                 break;
             case ShipmentStatus.Delivered:
-                shipment.MarkAsDelivered();
+                shipment.CompleteDelivery();
                 break;
             case ShipmentStatus.Cancelled:
                 shipment.Cancel();

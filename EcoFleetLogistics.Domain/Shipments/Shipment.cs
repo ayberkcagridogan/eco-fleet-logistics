@@ -1,14 +1,18 @@
+using System.Diagnostics.Contracts;
+using EcoFleetLogistics.Domain.Common;
+using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Shipments.Enums;
+using EcoFleetLogistics.Domain.Users;
 
 namespace EcoFleetLogistics.Domain.Shipments
 {
-    public class Shipment
+    public class Shipment : ICompanyResource
     {
         public Guid Id { get; private set; }
-        public string TrackingNumber { get; private set; }
-        public string SenderName { get; private set; }
-        public string ReceiverName { get; private set; }
-        public string DestinationAddress { get; private set; }
+        public string TrackingNumber { get; private set; } = null!;
+        public string SenderName { get; private set; } = null!;
+        public string ReceiverName { get; private set; } = null!;
+        public string DestinationAddress { get; private set; } = null!;
         public double Weight { get; private set; }
         public ShipmentStatus Status { get; private set; }
         public bool IsDeleted { get; private set; }
@@ -16,15 +20,31 @@ namespace EcoFleetLogistics.Domain.Shipments
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
 
-        private Shipment() // Parameterless constructor for EF Core
-        {
-            TrackingNumber = null!;
-            SenderName = null!;
-            ReceiverName = null!;
-            DestinationAddress = null!;
-        } 
+        public Guid CompanyId { get; private set; }
+        public Company Company { get; private set; } = null!;
 
-        private Shipment(Guid id, string trackingNumber, string senderName, string receiverName, string destinationAddress, double weight)
+        public Guid CreatedById { get; private set; }
+        public User CreatedBy { get; private set; } = null!;
+
+        public Guid? DriverId { get; private set; }
+        public User? Driver { get; private set; }
+
+        // Parameterless constructor for EF Core
+        private Shipment() {}     
+
+        private Shipment(
+            Guid id,
+            string trackingNumber,
+            string senderName, 
+            string receiverName, 
+            string destinationAddress,
+            double weight,
+            ShipmentStatus status,
+            DateTime createdAt,
+            Guid companyId,
+            Guid createdById,
+            Guid? driverId = null,
+            DateTime? updatedAt = null)
         {
             Id = id;
             TrackingNumber = trackingNumber;
@@ -32,15 +52,22 @@ namespace EcoFleetLogistics.Domain.Shipments
             ReceiverName = receiverName;
             DestinationAddress = destinationAddress;
             Weight = weight;
-            Status = ShipmentStatus.Pending;
-            CreatedAt = DateTime.UtcNow;
-            UpdatedAt = null;
+            Status = status;
+            CompanyId = companyId;
+            CreatedById = createdById;
+            DriverId = driverId;
+            CreatedAt = createdAt;
+            UpdatedAt = updatedAt;
         }
-        public static Shipment Create(string trackingNumber, string senderName, string receiverName, string destinationAddress, double weight)
+        public static Shipment Create( 
+            string senderName,
+            string receiverName, 
+            string destinationAddress, 
+            double weight,
+            Guid companyId,
+            Guid createdById,
+            Guid? driverId = null)
         {
-            if (string.IsNullOrWhiteSpace(trackingNumber))
-                throw new ArgumentException("Tracking number cannot be empty." , nameof(trackingNumber));
-
             if (string.IsNullOrWhiteSpace(senderName))
                 throw new ArgumentException("Sender name cannot be empty.", nameof(senderName));
 
@@ -53,7 +80,18 @@ namespace EcoFleetLogistics.Domain.Shipments
             if (weight <= 0)
                 throw new ArgumentException("Weight must be greater than zero.", nameof(weight));
 
-            return new Shipment(Guid.NewGuid(), trackingNumber, senderName, receiverName, destinationAddress, weight);
+            return new Shipment(
+                Guid.NewGuid(),
+                $"TRK-{Guid.NewGuid().ToString()[..8].ToUpper()}", 
+                senderName, 
+                receiverName, 
+                destinationAddress, 
+                weight,
+                driverId.HasValue ? ShipmentStatus.Assigned : ShipmentStatus.Pending,
+                DateTime.UtcNow,
+                companyId,
+                createdById,
+                driverId);
         }
 
         public void UpdateDetails(string? receiverName = null, string? destinationAddress = null)
@@ -74,22 +112,28 @@ namespace EcoFleetLogistics.Domain.Shipments
 
             UpdatedAt = DateTime.UtcNow;
         }
+
+        public void AssignDriver(Guid driverId)
+        {
+            DriverId = driverId;
+            Status = ShipmentStatus.Assigned;
+            UpdatedAt = DateTime.UtcNow;
+        }
         public void StartTransit()
         {
-            if (Status != ShipmentStatus.Pending)
-            {
-                throw new InvalidOperationException($"Cannot start transit. Current status is {Status}.");
-            }
+            if (DriverId == null)
+                throw new InvalidOperationException("Cannot start transit without assigning a driver.");
 
+            if (Status != ShipmentStatus.Pending)
+                throw new InvalidOperationException($"Cannot start transit. Current status is {Status}.");
+          
             Status = ShipmentStatus.InTransit;
             UpdatedAt = DateTime.UtcNow;
         }
-        public void MarkAsDelivered()
+        public void CompleteDelivery()
         {
             if (Status != ShipmentStatus.InTransit)
-            {
                 throw new InvalidOperationException("A shipment can only be marked as delivered if it is currently In Transit.");
-            }
 
             Status = ShipmentStatus.Delivered;
             UpdatedAt = DateTime.UtcNow;
