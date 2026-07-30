@@ -6,25 +6,19 @@ namespace EcoFleetLogistics.Domain.Users;
 public class User
 {
     public Guid Id { get; private set; }
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public Email Email { get; private set; }
-    public string PasswordHash {get; private set;}
+    public string FirstName { get; private set; } = null!;
+    public string LastName { get; private set; } = null!;
+    public Email Email { get; private set; } = null!;
+    public string PasswordHash {get; private set;} = null!;
     public UserRole Role { get; private set; }
     public DateTime CreateAt { get; private set; }
 
     public Guid CompanyId { get; private set; }
-    public Company Company { get; private set; }
+    public Company Company { get; private set; } = null!;
   
 
-    private User() // Parameterless constructor for EF Core
-    {
-        FirstName = null!;
-        LastName = null!;
-        Email = null!;
-        PasswordHash = null!;
-        Company = null!;
-    }
+    private User() {}// Parameterless constructor for EF Core
+    
     
     private User(Guid id, string firstName, string lastName, Email email, string passwordHash, UserRole role, Guid companyId)
     {
