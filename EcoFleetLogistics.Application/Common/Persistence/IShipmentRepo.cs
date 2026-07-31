@@ -9,5 +9,6 @@ namespace EcoFleetLogistics.Application.Common.Persistence
         Task AddAsync(Shipment shipment, CancellationToken cancellationToken = default);
         void Update(Shipment shipment, CancellationToken cancellationToken = default);
         Task<bool> ExistsByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default);
+        void Remove(Shipment shipment);
     }
 }

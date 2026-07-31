@@ -20,7 +20,7 @@ namespace EcoFleetLogistics.Infrastructure.Services
                 var userIdStr = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                             ?? User?.FindFirst("sub")?.Value;
 
-                return Guid.TryParse(userIdStr, out var userId) ? UserId : null;
+                return Guid.TryParse(userIdStr, out var userId) ? userId : null;
             }
         }
 

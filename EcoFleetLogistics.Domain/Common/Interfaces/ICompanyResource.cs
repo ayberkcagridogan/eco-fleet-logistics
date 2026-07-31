@@ -1,4 +1,4 @@
-namespace EcoFleetLogistics.Domain.Common
+namespace EcoFleetLogistics.Domain.Common.Interfaces
 {
     public interface ICompanyResource
     {

@@ -25,7 +25,7 @@ public class DeleteShipmentCommandHandler : IRequestHandler<DeleteShipmentComman
             return false;
 
         shipment.Delete();
-        _shipmentRepo.Update(shipment, cancellationToken);
+        _shipmentRepo.Remove(shipment);
         await _unityOfWork.SaveChangesAsync(cancellationToken);
         
         return true;
