@@ -41,5 +41,10 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
                                     .AsNoTracking()
                                     .AnyAsync(s => s.TrackingNumber == trackingNumber, cancellationToken);
         }
+
+        public void Remove(Shipment shipment)
+        {
+            _context.Shipments.Remove(shipment);
+        }
     }
 }

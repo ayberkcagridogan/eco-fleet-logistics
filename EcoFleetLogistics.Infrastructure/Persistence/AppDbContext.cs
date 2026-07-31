@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using EcoFleetLogistics.Application.Common.Interfaces;
 using EcoFleetLogistics.Domain.Authentication;
 using EcoFleetLogistics.Domain.Common;
+using EcoFleetLogistics.Domain.Common.Interfaces;
 using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Shipments;
 using EcoFleetLogistics.Domain.Users;
@@ -13,6 +14,7 @@ namespace EcoFleetLogistics.Infrastructure.Persistence
     public class AppDbContext : DbContext
     {
         private readonly ICurrentUserService _currentUserService;
+        public Guid? CurrentCompanyId => _currentUserService.CompanyId;
 
         public AppDbContext(
             DbContextOptions<AppDbContext> options,
@@ -32,37 +34,54 @@ namespace EcoFleetLogistics.Infrastructure.Persistence
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
 
-            foreach(var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
+                var parameter = Expression.Parameter(entityType.ClrType, "e");
+                Expression? finalFilter = null;
+
+                //  Soft Delete Filter (IsDeleted == false)
+                if (typeof(ISoftDelete).IsAssignableFrom(entityType.ClrType))
+                {
+                    var isDeletedProp = Expression.Property(parameter, nameof(ISoftDelete.IsDeleted));
+                    var isNotDeleted = Expression.Equal(isDeletedProp, Expression.Constant(false));
+
+                    finalFilter = isNotDeleted;
+                }
+
+                // Multi-Tenant Filter (CompanyId == CurrentCompanyId)
                 if (typeof(ICompanyResource).IsAssignableFrom(entityType.ClrType))
                 {
-                    // e => _currentUserService.CompanyId == null || e.CompanyId == _currentUserService.CompanyId
-                    var parameter = Expression.Parameter(entityType.ClrType, "e");
+                    var tenantFilter = GetMultiTenantFilter(entityType.ClrType, parameter);
 
-                    // _currentUserService.CompanyId
-                    var currentCompayIdProp = Expression.Property(
-                        Expression.Constant(_currentUserService),
-                        nameof(ICurrentUserService.CompanyId));
-                    
-                    // e.CompanyId
-                    var entityCompanyIdProp = Expression.Property(parameter, nameof(ICompanyResource.CompanyId));
+                    finalFilter = finalFilter == null 
+                        ? tenantFilter 
+                        : Expression.AndAlso(finalFilter, tenantFilter);
+                }
 
-                    // _currentUserService.CompanyId == null
-                    var isCompanyIdNull = Expression.Equal(
-                        currentCompayIdProp,
-                        Expression.Constant(null, typeof(Guid?)));
-
-                    // e.CompanyId == _currentUserService.CompanyId
-                    var isCompanyIdMatch = Expression.Equal(
-                        entityCompanyIdProp,
-                        Expression.Convert(currentCompayIdProp, typeof(Guid)));
-                    
-                    // (CompanyId == null) OR (e.CompanyId == currentCompanyId)
-                    var body = Expression.OrElse(isCompanyIdNull, isCompanyIdMatch);
-                    var lambda = Expression.Lambda(body, parameter);
+                // All Filters
+                if (finalFilter != null)
+                {
+                    var lambda = Expression.Lambda(finalFilter, parameter);
                     modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
                 }
             }
+        }
+
+        private Expression GetMultiTenantFilter(Type entityType, ParameterExpression parameter)
+        {
+          
+            var companyIdProperty = Expression.Property(parameter, nameof(ICompanyResource.CompanyId));
+
+          
+            var currentCompanyIdProperty = Expression.Property(
+                Expression.Constant(this), 
+                nameof(CurrentCompanyId)
+            );
+        
+            var leftConverted = Expression.Convert(companyIdProperty, typeof(Guid?));
+            var rightConverted = Expression.Convert(currentCompanyIdProperty, typeof(Guid?));
+
+            return Expression.Equal(leftConverted, rightConverted);
         }
     }
 }

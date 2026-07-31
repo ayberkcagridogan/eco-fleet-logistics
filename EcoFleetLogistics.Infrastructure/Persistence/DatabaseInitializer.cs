@@ -52,7 +52,7 @@ public static class DatabaseInitializer
 
     private static async Task SeedShipmentsDataAsync(AppDbContext context, ILogger<AppDbContext> logger, Guid companyId, Guid createdById)
     {
-        if (!await context.Shipments.AnyAsync())
+        if (!await context.Shipments.IgnoreQueryFilters().AnyAsync())
         {
             logger.LogInformation("The Shipment table is empty; sample data is being added...");
 

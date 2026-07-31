@@ -13,6 +13,7 @@ using EcoFleetLogistics.Application.Common.Interfaces.Authentication;
 using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Infrastructure.Services;
 using Serilog;
+using EcoFleetLogistics.Infrastructure.Persistence.Interceptors;
 
 namespace EcoFleetLogistics.Infrastructure;
 public static class DependencyInjection {
@@ -35,10 +36,17 @@ public static class DependencyInjection {
     public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddHttpContextAccessor();
-        
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
-            b => b.MigrationsAssembly("EcoFleetLogistics.Infrastructure")));        
+        services.AddScoped<AuditAndSoftDeleteInterceptor>();
+    
+        services.AddDbContext<AppDbContext>((sp, options) =>
+        {
+            var interceptor = sp.GetRequiredService<AuditAndSoftDeleteInterceptor>();
+
+             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+                b => b.MigrationsAssembly("EcoFleetLogistics.Infrastructure"))
+                .AddInterceptors(interceptor); 
+        });
+                
         
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
            

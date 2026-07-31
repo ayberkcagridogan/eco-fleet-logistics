@@ -1,13 +1,12 @@
+using EcoFleetLogistics.Domain.Common;
 using EcoFleetLogistics.Domain.Users;
 
 namespace EcoFleetLogistics.Domain.Authentication;
 
-public class RefreshToken
+public class RefreshToken : BaseEntity
 {
-    public Guid Id { get; set; } 
     public string Token { get; private set; }  = null!;
     public DateTime ExpiresAt { get; private set; }
-    public DateTime CreatedAt { get; private set; }
     public DateTime? RevokedAt { get; private set; }
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;

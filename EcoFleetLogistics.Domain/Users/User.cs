@@ -1,18 +1,16 @@
+using EcoFleetLogistics.Domain.Common;
 using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Users.Enums;
 using EcoFleetLogistics.Domain.ValueObjects;
 
 namespace EcoFleetLogistics.Domain.Users;
-public class User
+public class User : BaseEntity
 {
-    public Guid Id { get; private set; }
     public string FirstName { get; private set; } = null!;
     public string LastName { get; private set; } = null!;
     public Email Email { get; private set; } = null!;
     public string PasswordHash {get; private set;} = null!;
     public UserRole Role { get; private set; }
-    public DateTime CreateAt { get; private set; }
-
     public Guid CompanyId { get; private set; }
     public Company Company { get; private set; } = null!;
   
@@ -29,7 +27,6 @@ public class User
         PasswordHash = passwordHash;
         Role = role;
         CompanyId = companyId;
-        CreateAt = DateTime.UtcNow;
     }
 
     public static User Create(string firstName, string lastName, string email, string passwordHash, Guid companyId, UserRole role = UserRole.Customer)

@@ -60,7 +60,7 @@ namespace EcoFleetLogistics.Api.Endpoints
             ISender madiator,
             CancellationToken cancellationToken ) => 
             {
-                var command = new ChangeShipmentStatusCommand(id, request.NewStatus);
+                var command = new ChangeShipmentStatusCommand(id, request.NewStatus, request.DriverId);
                 var isSucces = await madiator.Send(command, cancellationToken);
                 return isSucces 
                     ? Results.NoContent()
@@ -90,7 +90,7 @@ namespace EcoFleetLogistics.Api.Endpoints
 
 
             //Shipment Soft Delete
-            app.MapDelete("/api/shipments/{id:guid}", async (
+            group.MapDelete("{id:guid}", async (
             Guid id, 
             IMediator mediator) =>
             {

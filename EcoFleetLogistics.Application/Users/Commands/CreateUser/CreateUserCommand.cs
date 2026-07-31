@@ -1,5 +1,6 @@
 using EcoFleetLogistics.Application.Authentication.Common;
 using EcoFleetLogistics.Application.Common.Authentication.Interfaces;
+using EcoFleetLogistics.Application.Common.Interfaces;
 using EcoFleetLogistics.Application.Common.Interfaces.Authentication;
 using EcoFleetLogistics.Application.Common.Interfaces.Persistence;
 using EcoFleetLogistics.Application.Common.Persistence;
@@ -13,7 +14,6 @@ public record CreateUserCommand(
     string LastName,
     string Email,
     string Password,
-    Guid CompanyId,
     string Role = "Customer"
 ) : IRequest<CreateUserResponse>;
 
@@ -22,23 +22,26 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Creat
 {
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
-    private readonly ITokenService _tokenService;
     private readonly IUnityOfWork _unityOfWork;
+    private readonly ICurrentUserService _currentUserService;
 
-    public CreateUserCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnityOfWork unityOfWork)
+    public CreateUserCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ICurrentUserService currentUserService, IUnityOfWork unityOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
-        _tokenService = tokenService;
         _unityOfWork = unityOfWork;
+        _currentUserService = currentUserService;
     }
     public async Task<CreateUserResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
         var passwordHash = _passwordHasher.HashPassword(request.Password);
-        var user = User.Create(request.FirstName, request.LastName, request.Email, passwordHash, request.CompanyId, User.ResolveRole(request.Role));
+
+        var companyId = _currentUserService.CompanyId 
+            ?? throw new UnauthorizedAccessException("Tenant/Company context is missing.");
+
+        var user = User.Create(request.FirstName, request.LastName, request.Email, passwordHash, companyId, User.ResolveRole(request.Role));
 
         await _userRepo.AddAsync(user, cancellationToken);
-        var tokenResult = await _tokenService.GenerateAndSaveTokensAsync(user, cancellationToken);
         await _unityOfWork.SaveChangesAsync(cancellationToken);
         
         return new CreateUserResponse(

@@ -1,31 +1,23 @@
 using System.Diagnostics.Contracts;
 using EcoFleetLogistics.Domain.Common;
+using EcoFleetLogistics.Domain.Common.Interfaces;
 using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Shipments.Enums;
 using EcoFleetLogistics.Domain.Users;
 
 namespace EcoFleetLogistics.Domain.Shipments
 {
-    public class Shipment : ICompanyResource
+    public class Shipment : BaseEntity ,ICompanyResource
     {
-        public Guid Id { get; private set; }
         public string TrackingNumber { get; private set; } = null!;
         public string SenderName { get; private set; } = null!;
         public string ReceiverName { get; private set; } = null!;
         public string DestinationAddress { get; private set; } = null!;
         public double Weight { get; private set; }
         public ShipmentStatus Status { get; private set; }
-        public bool IsDeleted { get; private set; }
-        public DateTime? DeletedAt { get; private set; }
-        public DateTime CreatedAt { get; private set; }
-        public DateTime? UpdatedAt { get; private set; }
-
         public Guid CompanyId { get; private set; }
         public Company Company { get; private set; } = null!;
-
-        public Guid CreatedById { get; private set; }
         public User CreatedBy { get; private set; } = null!;
-
         public Guid? DriverId { get; private set; }
         public User? Driver { get; private set; }
 
@@ -40,7 +32,6 @@ namespace EcoFleetLogistics.Domain.Shipments
             string destinationAddress,
             double weight,
             ShipmentStatus status,
-            DateTime createdAt,
             Guid companyId,
             Guid createdById,
             Guid? driverId = null,
@@ -56,7 +47,6 @@ namespace EcoFleetLogistics.Domain.Shipments
             CompanyId = companyId;
             CreatedById = createdById;
             DriverId = driverId;
-            CreatedAt = createdAt;
             UpdatedAt = updatedAt;
         }
         public static Shipment Create( 
@@ -88,7 +78,6 @@ namespace EcoFleetLogistics.Domain.Shipments
                 destinationAddress, 
                 weight,
                 driverId.HasValue ? ShipmentStatus.Assigned : ShipmentStatus.Pending,
-                DateTime.UtcNow,
                 companyId,
                 createdById,
                 driverId);
@@ -109,26 +98,29 @@ namespace EcoFleetLogistics.Domain.Shipments
                 
             if (!string.IsNullOrWhiteSpace(destinationAddress))
                 DestinationAddress = destinationAddress;
-
-            UpdatedAt = DateTime.UtcNow;
         }
 
         public void AssignDriver(Guid driverId)
         {
+            EnsureNotFinalState();
+
+            if (Status == ShipmentStatus.InTransit)
+                throw new InvalidOperationException("Cannot re-assign driver while shipment is In Transit.");
+
             DriverId = driverId;
-            Status = ShipmentStatus.Assigned;
-            UpdatedAt = DateTime.UtcNow;
+            Status = ShipmentStatus.Assigned;   
         }
         public void StartTransit()
         {
-            if (DriverId == null)
+            EnsureNotFinalState();
+
+            if (!DriverId.HasValue)
                 throw new InvalidOperationException("Cannot start transit without assigning a driver.");
 
-            if (Status != ShipmentStatus.Pending)
+            if (Status != ShipmentStatus.Assigned && Status != ShipmentStatus.Pending)
                 throw new InvalidOperationException($"Cannot start transit. Current status is {Status}.");
           
             Status = ShipmentStatus.InTransit;
-            UpdatedAt = DateTime.UtcNow;
         }
         public void CompleteDelivery()
         {
@@ -136,18 +128,16 @@ namespace EcoFleetLogistics.Domain.Shipments
                 throw new InvalidOperationException("A shipment can only be marked as delivered if it is currently In Transit.");
 
             Status = ShipmentStatus.Delivered;
-            UpdatedAt = DateTime.UtcNow;
         }
         public void Cancel()
         {
             if (Status == ShipmentStatus.InTransit)
-            throw new InvalidOperationException("An 'InTransit' shipment cannot be cancelled.");
+                throw new InvalidOperationException("An 'InTransit' shipment cannot be cancelled.");
 
             if (Status == ShipmentStatus.Delivered)
                 throw new InvalidOperationException("A 'Delivered' shipment cannot be cancelled.");
 
             Status = ShipmentStatus.Cancelled;
-            UpdatedAt = DateTime.UtcNow;
         }
 
         public void Delete()
@@ -158,8 +148,6 @@ namespace EcoFleetLogistics.Domain.Shipments
             if (Status == ShipmentStatus.Delivered)
                 throw new InvalidOperationException("A 'Delivered' shipment cannot be deleted.");
                 
-            IsDeleted = true;
-            DeletedAt = DateTime.UtcNow;
         }
 
         private void EnsureNotFinalState()

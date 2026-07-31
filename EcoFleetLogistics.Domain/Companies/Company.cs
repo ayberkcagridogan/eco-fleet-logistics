@@ -1,15 +1,13 @@
+using EcoFleetLogistics.Domain.Common;
 using EcoFleetLogistics.Domain.Users;
 
 namespace EcoFleetLogistics.Domain.Companies
 {
-    public class Company
+    public class Company : BaseEntity
     {
-        public Guid Id { get; private set; }
         public string Name { get; private set; }
         public string TaxNumber { get; private set; }
         public bool IsActive { get; private set; }
-        public DateTime CreatedAt { get; private set; }
-        public DateTime? UpdatedAt { get; private set; }
     
         private readonly List<User> _users = new();
         public IReadOnlyCollection<User> Users => _users.AsReadOnly();
@@ -20,13 +18,12 @@ namespace EcoFleetLogistics.Domain.Companies
             TaxNumber = null!;
         }
 
-        private Company(Guid id, string name, string taxNumer, bool isActive, DateTime createdAt)
+        private Company(Guid id, string name, string taxNumer, bool isActive)
         {
             Id = id;
             Name = name;
             TaxNumber = taxNumer;
             IsActive = isActive;
-            CreatedAt = createdAt;
         }
 
         public static Company Create(string name, string taxNumber)
@@ -43,7 +40,6 @@ namespace EcoFleetLogistics.Domain.Companies
                 Name = name.Trim(),
                 TaxNumber = taxNumber.Trim(),
                 IsActive = true,
-                CreatedAt = DateTime.UtcNow
             };
         }
 
