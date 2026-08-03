@@ -5,6 +5,7 @@ using Serilog;
 using EcoFleetLogistics.Infrastructure.Persistence;
 using EcoFleetLogistics.Api.Endpoints;
 using EcoFleetLogistics.Api.Extensions;
+using EcoFleetLogistics.WebApi.Endpoints;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +53,7 @@ app.UseAuthorization();
 app.MapShipmentEndPoints();
 app.MapAutEndPoints();
 app.MapUsersEndpoints();
+app.MapCompanyEndpoints();
 await app.MigrateDatabaseAsync();
 
 
