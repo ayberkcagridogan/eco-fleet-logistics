@@ -35,12 +35,12 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, A
 
     public async Task<AuthenticationResult> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
     {
-        var existingToken = await _refreshTokenRepo.GetByTokenAsync(request.RefreshToken, cancellationToken);
+        var existingToken = await _refreshTokenRepo.GetByTokenWithoutTenantFilterAsync(request.RefreshToken, cancellationToken);
 
         if(existingToken == null || !existingToken.IsActive)
             throw new UnauthorizedAccessException("Invalid or expired refresh token.");
         
-        var user = await _userRepo.GetByIdAsync(existingToken.UserId , cancellationToken);
+        var user = await _userRepo.GetByEmailAndCompanyIdWithoutTenantFilterAsync(existingToken.User.Email.Value, existingToken.User.CompanyId, cancellationToken);
         if(user == null)
             throw new UnauthorizedAccessException("User associated with token not found.");
 

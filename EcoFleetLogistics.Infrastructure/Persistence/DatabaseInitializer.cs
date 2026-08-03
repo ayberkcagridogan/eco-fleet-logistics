@@ -3,6 +3,7 @@ using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Shipments;
 using EcoFleetLogistics.Domain.Users;
 using EcoFleetLogistics.Domain.Users.Enums;
+using EcoFleetLogistics.Infrastructure.Persistence.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,7 +53,7 @@ public static class DatabaseInitializer
 
     private static async Task SeedShipmentsDataAsync(AppDbContext context, ILogger<AppDbContext> logger, Guid companyId, Guid createdById)
     {
-        if (!await context.Shipments.IgnoreQueryFilters().AnyAsync())
+        if (!await context.Shipments.IgnoreTenantFilterIf(true).AnyAsync())
         {
             logger.LogInformation("The Shipment table is empty; sample data is being added...");
 
@@ -86,13 +87,15 @@ public static class DatabaseInitializer
     }
     private static async Task<(Guid? CompanyId, Guid? UserId)> SeedUsersDataAsync(AppDbContext context, ILogger<AppDbContext> logger, IPasswordHasher passwordHasher)
     {
-        if (!await context.Users.AnyAsync())
+        if (!await context.Users.IgnoreTenantFilterIf(true).AnyAsync())
         {
             logger.LogInformation("User not found in the database. Creating default SuperAdmin...");
 
             var adminCompany = Company.Create(
-                name: "EcoFleet Headquarters",
-                taxNumber: "9999999999" // Varsa diğer zorunlu alanlar
+                name: "SuperAdmin Company",
+                taxNumber: "9999999999",
+                adminEmail: "admin@superadmin.com",
+                domain: "superadmin.com"
             );
 
             await context.Companies.AddAsync(adminCompany);
@@ -100,9 +103,9 @@ public static class DatabaseInitializer
             var adminUser = User.Create(
                 firstName: "System",
                 lastName: "Admin",
-                email: "admin@ecofleet.com",
+                email: "admin@superadmin.com",
                 passwordHash: passwordHasher.HashPassword("Admin123!"), 
-                role: UserRole.Admin,
+                role: UserRole.SuperAdmin,
                 companyId: adminCompany.Id
             );
 

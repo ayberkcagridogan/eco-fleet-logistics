@@ -9,17 +9,17 @@ namespace EcoFleetLogistics.Api.Extensions
         {
             services.AddAuthorization(opt =>
             {
-                opt.AddPolicy(Policies.RequireAdmin, policy => 
-                policy.RequireRole(Roles.Admin));
+                opt.AddPolicy(Policies.RequireSuperAdmin, policy => 
+                policy.RequireRole(Roles.SuperAdmin));
 
-                opt.AddPolicy(Policies.RequireFleetManager, policy => 
-                policy.RequireRole(Roles.FleetManager));
+                opt.AddPolicy(Policies.RequireCompanyAdmin, policy => 
+                policy.RequireRole(Roles.CompanyAdmin));
 
                 opt.AddPolicy(Policies.RequireDriver, policy => 
                 policy.RequireRole(Roles.Driver));
 
                 opt.AddPolicy(Policies.ManagementOnly, policy => 
-                policy.RequireRole(Roles.Admin, Roles.FleetManager));
+                policy.RequireRole(Roles.SuperAdmin, Roles.CompanyAdmin));
             });
 
             return services;

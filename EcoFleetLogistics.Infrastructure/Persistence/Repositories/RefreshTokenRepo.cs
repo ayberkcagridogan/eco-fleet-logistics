@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using EcoFleetLogistics.Application.Common.Persistence;
 using EcoFleetLogistics.Domain.Authentication;
+using EcoFleetLogistics.Infrastructure.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
@@ -21,7 +22,16 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Repositories
         public async Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
             return await _context.RefreshTokens
-                                    .FirstAsync(rt => rt.Token == refreshToken, cancellationToken);
+                     .Include(rt => rt.User)
+                     .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
+        }
+
+        public async Task<RefreshToken?> GetByTokenWithoutTenantFilterAsync(string refreshToken, CancellationToken cancellationToken = default)
+        {
+            return await _context.RefreshTokens
+                                 .IgnoreTenantFilterIf(true)
+                                 .Include(rt => rt.User)
+                                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
         }
     }
 }

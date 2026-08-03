@@ -15,17 +15,27 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
     private readonly IUnityOfWork _unityOfWork;
+    private readonly ICompanyRepo _companyRepo;
 
-    public LoginCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService, IUnityOfWork unityOfWork)
+    public LoginCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher,ICompanyRepo companyRepo, ITokenService tokenService, IUnityOfWork unityOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
         _unityOfWork = unityOfWork;
+        _companyRepo = companyRepo;
     }
     public async Task<AuthenticationResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
-        var user = await _userRepo.GetByEmailAsync(request.Email, cancellationToken);
+        var domain = request.Email.Split('@').LastOrDefault();
+        if (string.IsNullOrWhiteSpace(domain))
+            throw new UnauthorizedAccessException("Invalid email format.");
+        
+        var company = await _companyRepo.GetCompanyByDomainWithoutTenantFilterAsync(domain, cancellationToken);
+        if(company is null || !company.IsActive)
+            throw new UnauthorizedAccessException("The company associated with this email is either inactive or does not exist.");
+
+        var user = await _userRepo.GetByEmailAndCompanyIdWithoutTenantFilterAsync(request.Email,company.Id, cancellationToken);
         if(user is null)
             throw new UnauthorizedAccessException("Incorrect email or password.");
         

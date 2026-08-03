@@ -60,6 +60,7 @@ public static class DependencyInjection {
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUnityOfWork, UnityOfWork>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<ICompanyRepo, CompanyRepo>();
         
         return services;
     }
