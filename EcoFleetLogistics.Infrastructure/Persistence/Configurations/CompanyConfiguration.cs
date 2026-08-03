@@ -25,6 +25,8 @@ namespace EcoFleetLogistics.Infrastructure.Persistence.Configurations
                 .WithOne(u => u.Company)
                 .HasForeignKey(u => u.CompanyId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            
         }
     }
 }

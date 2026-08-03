@@ -1,10 +1,11 @@
 using EcoFleetLogistics.Domain.Common;
+using EcoFleetLogistics.Domain.Common.Interfaces;
 using EcoFleetLogistics.Domain.Companies;
 using EcoFleetLogistics.Domain.Users.Enums;
 using EcoFleetLogistics.Domain.ValueObjects;
 
 namespace EcoFleetLogistics.Domain.Users;
-public class User : BaseEntity
+public class User : BaseEntity , ICompanyResource
 {
     public string FirstName { get; private set; } = null!;
     public string LastName { get; private set; } = null!;
@@ -29,7 +30,7 @@ public class User : BaseEntity
         CompanyId = companyId;
     }
 
-    public static User Create(string firstName, string lastName, string email, string passwordHash, Guid companyId, UserRole role = UserRole.Customer)
+    public static User Create(string firstName, string lastName, string email, string passwordHash, Guid companyId, UserRole role = UserRole.User)
     {
          if (string.IsNullOrWhiteSpace(firstName))
                 throw new ArgumentException("First Name cannot be empty.", nameof(firstName));
@@ -51,7 +52,7 @@ public class User : BaseEntity
     public static UserRole ResolveRole(string? role)
     {
         if(string.IsNullOrWhiteSpace(role))
-           return UserRole.Customer;
+           return UserRole.User;
         
         if(!Enum.TryParse<UserRole>(role, ignoreCase: true, out var parsedRole))
             throw new ArgumentException("Invalid role specified. Valid roles are: User, Admin vs.", nameof(role));

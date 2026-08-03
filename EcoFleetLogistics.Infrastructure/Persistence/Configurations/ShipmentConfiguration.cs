@@ -53,7 +53,5 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
             .WithMany()
             .HasForeignKey(s => s.DriverId)
             .OnDelete(DeleteBehavior.Restrict);
-        
-        builder.HasQueryFilter(s => !s.IsDeleted);
     }
 }
