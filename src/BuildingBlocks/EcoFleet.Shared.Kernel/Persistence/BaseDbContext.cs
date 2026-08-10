@@ -87,12 +87,16 @@ namespace EcoFleet.Shared.Kernel.Persistence
                 if (typeof(IMultiTenant).IsAssignableFrom(entityType.ClrType))
                 {
                     var tenantProperty = Expression.Property(parameter, nameof(IMultiTenant.TenantId));
+
                     var currentTenantId = Expression.Property(
                         Expression.Constant(_currentUserService), 
                         nameof(ICurrentUserService.TenantId)
                     );
 
-                    var tenantFilter = Expression.Equal(tenantProperty, currentTenantId);
+                    var tenantPropertyAsNullable = Expression.Convert(tenantProperty, typeof(Guid?));
+
+                    var tenantFilter = Expression.Equal(tenantPropertyAsNullable, currentTenantId);
+
                     filter = filter == null ? tenantFilter : Expression.AndAlso(filter, tenantFilter);
                 }
 
