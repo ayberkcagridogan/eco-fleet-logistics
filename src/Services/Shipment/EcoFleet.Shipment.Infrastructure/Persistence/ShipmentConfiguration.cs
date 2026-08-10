@@ -54,5 +54,7 @@ public class ShipmentConfiguration : IEntityTypeConfiguration<Domain.Shipments.S
             .HasForeignKey(s => s.DriverId)
             .OnDelete(DeleteBehavior.Restrict);
             */
+
+            
     }
 }
