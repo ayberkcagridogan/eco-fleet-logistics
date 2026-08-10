@@ -3,6 +3,7 @@ using EcoFleet.Company.Application.Companies.Commands.CreateCompany;
 using EcoFleet.Company.Application.Companies.Commands.UpdateCompanyStatus;
 using EcoFleet.Company.Application.Companies.Queries.GetCompanies;
 using EcoFleet.Company.Infrastructure;
+using EcoFleet.Shared.Kernel;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +12,16 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
-
+builder.Services.AddSharedKernel(builder.Configuration);
 builder.Services.AddCompanyInfrastructure(builder.Configuration);
 builder.Services.AddCompanyApplication();
 builder.Services.AddOpenApi();
+
+builder.Services.AddHealthChecks()
+    .AddSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+        name: "company-db-check",
+        tags: new[] { "db", "ready" });
 
 var app = builder.Build();
 
@@ -24,6 +31,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.MapHealthChecks("/health").AllowAnonymous();
 app.UseHttpsRedirection();
 
 var group = app.MapGroup("/api/v1/company")

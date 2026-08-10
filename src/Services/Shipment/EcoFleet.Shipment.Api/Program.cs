@@ -18,6 +18,12 @@ builder.Services.AddShipmentInfrastructure(builder.Configuration);
 builder.Services.AddShipmentApplication();
 builder.Services.AddOpenApi();
 
+builder.Services.AddHealthChecks()
+    .AddSqlServer(
+        connectionString: builder.Configuration.GetConnectionString("DefaultConnection")!,
+        name: "shipment-db-check",
+        tags: new[] { "db", "ready" });
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -26,6 +32,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.MapHealthChecks("/health").AllowAnonymous();
 app.UseHttpsRedirection();
 
 var group = app.MapGroup("api/v1/shipments")

@@ -1,6 +1,8 @@
 using EcoFleet.Company.Application.Common.Persistence;
 using EcoFleet.Company.Infrastructure.Persistence;
 using EcoFleet.Company.Infrastructure.Persistence.Repositories;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
+using EcoFleetLogistics.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,6 +23,7 @@ public static class DependencyInjection {
         });  
 
         services.AddScoped<ICompanyRepo, CompanyRepo>();
+        services.AddScoped<IUnitOfWork, UnitOfWork<CompanyDbContext>>();
 
         return services;
     }

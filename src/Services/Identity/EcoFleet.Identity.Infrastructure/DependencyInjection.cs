@@ -6,6 +6,8 @@ using EcoFleet.Identity.Application.Features.Authentication.Common;
 using EcoFleet.Identity.Infrastructure.Authentication;
 using EcoFleet.Identity.Infrastructure.Persistence;
 using EcoFleet.Identity.Infrastructure.Persistence.Repositories;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
+using EcoFleetLogistics.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,6 +33,7 @@ public static class DependencyInjection {
         services.AddScoped<IRefreshTokenRepo, RefreshTokenRepo>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork<IdentityDbContext>>();
         
         return services;
     }
