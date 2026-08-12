@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../../BuildingBlocks/EcoFleet.ServiceDefaults/EcoFleet.ServiceDefaults.csproj" />
     <ProjectReference Include="..\EcoFleet.Company.Application\EcoFleet.Company.Application.csproj" />
     <ProjectReference Include="..\EcoFleet.Company.Infrastructure\EcoFleet.Company.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\BuildingBlocks\EcoFleet.Shared.Kernel\EcoFleet.Shared.Kernel.csproj" />
