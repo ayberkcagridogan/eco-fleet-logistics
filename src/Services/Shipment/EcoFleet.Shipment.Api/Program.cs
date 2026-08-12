@@ -13,7 +13,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddSharedKernel(builder.Configuration);
+builder.Services.AddSharedKernel(builder);
 builder.Services.AddShipmentInfrastructure(builder.Configuration);
 builder.Services.AddShipmentApplication();
 builder.Services.AddOpenApi();
@@ -32,7 +32,6 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapHealthChecks("/health").AllowAnonymous();
 app.UseHttpsRedirection();
 
 var group = app.MapGroup("api/v1/shipments")
@@ -120,6 +119,9 @@ IMediator mediator) =>
 .WithName("DeleteShipment")
 //.RequireAuthorization(Policies.ManagementOnly)
 .WithOpenApi();
+
+app.UseSharedKernelMiddlewares();
+app.UseSharedKernelEndpoints();
 
 app.Run();
 
