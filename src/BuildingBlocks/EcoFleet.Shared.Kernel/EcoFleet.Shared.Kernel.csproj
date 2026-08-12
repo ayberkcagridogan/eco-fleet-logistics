@@ -4,6 +4,7 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <IsAspireSharedProject>true</IsAspireSharedProject>
   </PropertyGroup>
 
 
@@ -24,6 +25,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="../EcoFleet.ServiceDefaults/EcoFleet.ServiceDefaults.csproj" />
     <ProjectReference Include="../EcoFleet.Shared.Kernel.Primitives/EcoFleet.Shared.Kernel.Primitives.csproj" />
   </ItemGroup>
 

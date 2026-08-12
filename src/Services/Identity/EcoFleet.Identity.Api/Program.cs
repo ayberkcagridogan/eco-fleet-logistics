@@ -7,7 +7,7 @@ using EcoFleet.Shared.Kernel;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSharedKernel(builder.Configuration);
+builder.Services.AddSharedKernel(builder);
 builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.Services.AddIdentityApplication();
 builder.Services.AddIdentityAuthorizationPolicies();
@@ -30,11 +30,11 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.MapHealthChecks("/health").AllowAnonymous();;
 app.UseHttpsRedirection();
 
 app.MapAutEndPoints();
 app.MapUsersEndpoints();
 
-
+app.UseSharedKernelMiddlewares();
+app.UseSharedKernelEndpoints();
 app.Run();
