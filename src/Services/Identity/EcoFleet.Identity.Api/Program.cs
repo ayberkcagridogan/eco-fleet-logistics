@@ -2,7 +2,9 @@ using EcoFleet.Identity.Api.Endpoints;
 using EcoFleet.Identity.Api.Extensions;
 using EcoFleet.Identity.Application;
 using EcoFleet.Identity.Infrastructure;
+using EcoFleet.Identity.Infrastructure.Persistence;
 using EcoFleet.Shared.Kernel;
+using EcoFleet.Shared.Kernel.Persistence.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +30,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.ApplyMigrationsAndSeedAsync<IdentityDbContext>();
 }
 
 app.UseHttpsRedirection();

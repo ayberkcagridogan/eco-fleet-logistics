@@ -21,7 +21,7 @@ public static class DependencyInjection {
         services.AddDbContext<IdentityDbContext>(options =>
         {
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
+                configuration.GetConnectionString("identity-db"),
                 b => b.MigrationsAssembly(typeof(IdentityDbContext).Assembly.FullName)
             );
         });   

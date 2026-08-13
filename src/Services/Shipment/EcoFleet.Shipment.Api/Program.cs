@@ -5,9 +5,11 @@ using EcoFleet.Shipment.Application.Shipments.Commands.CreateShipment;
 using EcoFleet.Shipment.Application.Shipments.Commands.DeleteShipment;
 using EcoFleet.Shipment.Application.Shipments.Commands.UpdateShipment;
 using EcoFleet.Shipment.Application.Shipments.Queries.GetShipmentById;
+using EcoFleet.Shared.Kernel.Persistence.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using EcoFleet.Shipment.Application;
+using EcoFleet.Shipment.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +32,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.ApplyMigrationsAndSeedAsync<ShipmentDbContext>();
 }
 
 app.UseHttpsRedirection();

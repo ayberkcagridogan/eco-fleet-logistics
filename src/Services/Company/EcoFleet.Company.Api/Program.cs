@@ -6,6 +6,8 @@ using EcoFleet.Company.Infrastructure;
 using EcoFleet.Shared.Kernel;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using EcoFleet.Shared.Kernel.Persistence.Extensions;
+using EcoFleet.Company.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +31,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    await app.ApplyMigrationsAndSeedAsync<CompanyDbContext>();
 }
 
 app.UseHttpsRedirection();
