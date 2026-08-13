@@ -15,7 +15,7 @@ public static class DependencyInjection {
         services.AddDbContext<ShipmentDbContext>(options =>
         {
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
+                configuration.GetConnectionString("shipment-db"),
                 b => b.MigrationsAssembly(typeof(ShipmentDbContext).Assembly.FullName)
             );
         });        

@@ -39,9 +39,8 @@ namespace EcoFleet.Shared.Kernel
             app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseExceptionHandler();
             app.UseAuthentication();
-
             app.UseMiddleware<SecurityAuditMiddleware>();
-
+           
             return app;
         }
 
