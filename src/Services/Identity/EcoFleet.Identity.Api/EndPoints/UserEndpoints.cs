@@ -8,7 +8,7 @@ namespace EcoFleet.Identity.Api.Endpoints
     {
         public static void MapUsersEndpoints(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("api/v1/users")
+            var group = app.MapGroup("api/v1/identity/users")
                         .WithTags("Users")
                         .RequireAuthorization(Policies.ManagementOnly);
 
@@ -16,7 +16,7 @@ namespace EcoFleet.Identity.Api.Endpoints
             group.MapPost("/", async(CreateUserCommand command, ISender mediator, CancellationToken ct) =>
             {
                var result = await mediator.Send(command , ct);
-               return Results.Created($"/api/v1/users/{result.Id}", result);
+               return Results.Created($"/api/v1/identity/users/{result.Id}", result);
             })
             .WithName("CreateUser")
             .WithOpenApi();

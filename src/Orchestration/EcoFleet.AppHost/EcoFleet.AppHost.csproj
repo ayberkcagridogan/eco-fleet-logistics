@@ -23,6 +23,7 @@
     <ProjectReference Include="../../Services/Company/EcoFleet.Company.Api/EcoFleet.Company.Api.csproj" />
     <ProjectReference Include="../../Services/Identity/EcoFleet.Identity.Api/EcoFleet.Identity.Api.csproj" />
     <ProjectReference Include="../../Services/Shipment/EcoFleet.Shipment.Api/EcoFleet.Shipment.Api.csproj" />
+    <ProjectReference Include="..\..\Gateways\EcoFleet.Gateway.Api\EcoFleet.Gateway.Api.csproj" />
   </ItemGroup>
 
 </Project>

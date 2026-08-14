@@ -1,5 +1,3 @@
-using Aspire.Hosting.ApplicationModel;
-
 var builder = DistributedApplication.CreateBuilder(args);
 
 // ==========================================
@@ -21,7 +19,7 @@ var redis = builder.AddRedis("redis").WithRedisCommander();
 
 var rabbitmq = builder.AddRabbitMQ("rabbitmq").WithManagementPlugin();
 
-var seq = builder.AddSeq("seq");
+var seq = builder.AddSeq("seq", port: 5341);
 
 // ==========================================
 // 2. MICROSERVICES & REFERENCE BINDINGS
@@ -31,6 +29,7 @@ var seq = builder.AddSeq("seq");
 // Identity API
 var identityApi = builder.AddProject<Projects.EcoFleet_Identity_Api>("identity-api")
     .WithReference(indentityDb)
+    .WaitFor(indentityDb)
     .WithReference(redis)
     .WithReference(rabbitmq)
     .WithReference(seq);
@@ -38,6 +37,7 @@ var identityApi = builder.AddProject<Projects.EcoFleet_Identity_Api>("identity-a
 // Company API
 var companyApi = builder.AddProject<Projects.EcoFleet_Company_Api>("company-api")
     .WithReference(companyDb)
+    .WaitFor(companyDb)
     .WithReference(redis)
     .WithReference(rabbitmq)
     .WithReference(seq);
@@ -45,10 +45,16 @@ var companyApi = builder.AddProject<Projects.EcoFleet_Company_Api>("company-api"
 // Shipment API
 var shipmentApi = builder.AddProject<Projects.EcoFleet_Shipment_Api>("shipment-api")
     .WithReference(shipmentDb)
+    .WaitFor(shipmentDb)
     .WithReference(redis)
     .WithReference(rabbitmq)
     .WithReference(seq);
 
-
+// 🚀 CENTRAL API GATEWAY (YARP)
+var gatewayApi = builder.AddProject<Projects.EcoFleet_Gateway_Api>("gateway-api")
+    .WithReference(identityApi)
+    .WithReference(companyApi)
+    .WithReference(shipmentApi)
+    .WithReference(seq);
 
 builder.Build().Run();

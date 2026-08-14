@@ -11,7 +11,7 @@ public static class AuthEndpoints
 {
     public static void MapAutEndPoints(this IEndpointRouteBuilder app)
     {
-            var group = app.MapGroup("api/v1/auth")
+            var group = app.MapGroup("api/v1/identity/auth")
                             .WithTags("Authentication");
                     
             group.MapPost("/login", async (LoginCommand command, ISender mediator, CancellationToken ct) =>
@@ -26,7 +26,7 @@ public static class AuthEndpoints
             group.MapPost("/refresh-token", async (RefreshTokenCommand command, ISender meditor, CancellationToken ct) =>
             {
                 var result = await meditor.Send(command, ct);
-                return Results.Created($"/api/users/{result.Id}", result);
+                return Results.Created($"/api/v1/identity/auth/{result.Id}", result);
             })
             .WithName("RefreshToken")
             .AllowAnonymous()
