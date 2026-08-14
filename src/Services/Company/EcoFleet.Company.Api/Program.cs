@@ -36,8 +36,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var group = app.MapGroup("/api/v1/company")
-            .WithTags("Company");
+var group = app.MapGroup("/api/v1/companies")
+            .WithTags("Companies");
             //.RequireAuthorization(Policies.RequireSuperAdmin);
 
         // 1. Create Company

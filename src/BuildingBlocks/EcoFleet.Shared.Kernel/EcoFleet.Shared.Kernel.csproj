@@ -25,6 +25,7 @@
 
 
   <ItemGroup>
+    <ProjectReference Include="../../Services/Shipment/EcoFleet.Shipment.Domain/EcoFleet.Shipment.Domain.csproj" />
     <ProjectReference Include="../EcoFleet.ServiceDefaults/EcoFleet.ServiceDefaults.csproj" />
     <ProjectReference Include="../EcoFleet.Shared.Kernel.Primitives/EcoFleet.Shared.Kernel.Primitives.csproj" />
   </ItemGroup>
