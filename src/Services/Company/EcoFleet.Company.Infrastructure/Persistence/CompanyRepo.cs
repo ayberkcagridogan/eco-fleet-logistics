@@ -1,4 +1,5 @@
 using EcoFleet.Company.Application.Common.Persistence;
+using EcoFleet.Shared.Kernel.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoFleet.Company.Infrastructure.Persistence.Repositories
@@ -31,7 +32,7 @@ namespace EcoFleet.Company.Infrastructure.Persistence.Repositories
         public async Task<Domain.Companies.Company?> GetCompanyByDomainWithoutTenantFilterAsync(string domain, CancellationToken cancellationToken = default)
         {
             return await _context.Companies
-                //    .IgnoreTenantFilterIf(true)
+                    .IgnoreTenantFilterIf(true)
                     .FirstOrDefaultAsync(x => x.Domain == domain, cancellationToken);
         }
 
@@ -72,6 +73,15 @@ namespace EcoFleet.Company.Infrastructure.Persistence.Repositories
         public void Remove(Domain.Companies.Company company)
         {
             _context.Companies.Remove(company);
+        }
+
+        public async Task<bool> HardDeleteCompanyAsync(Guid companyId, CancellationToken cancellationToken = default)
+        {
+            var affectedRows = await _context.Companies
+                    .Where(c => c.Id == companyId)
+                    .ExecuteDeleteAsync(cancellationToken);
+
+            return affectedRows > 0;
         }
     }
 }

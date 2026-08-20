@@ -8,16 +8,25 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using EcoFleet.Shared.Kernel.Persistence.Extensions;
 using EcoFleet.Company.Infrastructure.Persistence;
+using EcoFleet.Company.Infrastructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ConfigureEndpointDefaults(listenOptions =>
+    {
+        listenOptions.Protocols = Microsoft.AspNetCore.Server.Kestrel.Core.HttpProtocols.Http2;
+    });
+});
 
 builder.Services.AddSharedKernel(builder);
 builder.Services.AddCompanyInfrastructure(builder.Configuration);
 builder.Services.AddCompanyApplication();
 builder.Services.AddOpenApi();
+builder.Services.AddGrpc();
 
 builder.Services.AddHealthChecks()
     .AddSqlServer(
@@ -87,7 +96,10 @@ var group = app.MapGroup("/api/v1/companies")
         .WithName("GetCompanies")
         .WithOpenApi();
 
+
 app.UseSharedKernelMiddlewares();
 app.UseSharedKernelEndpoints();
+app.MapGrpcService<CompanyGrpcServiceImpl>();
+
 app.Run();
 

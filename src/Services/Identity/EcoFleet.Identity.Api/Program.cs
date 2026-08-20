@@ -4,15 +4,28 @@ using EcoFleet.Identity.Application;
 using EcoFleet.Identity.Infrastructure;
 using EcoFleet.Identity.Infrastructure.Persistence;
 using EcoFleet.Shared.Kernel;
+using EcoFleet.Shared.Kernel.Grpc;
 using EcoFleet.Shared.Kernel.Persistence.Extensions;
 
 
+AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSharedKernel(builder);
+builder.Services.AddIdentityAuthorizationPolicies();
 builder.Services.AddIdentityInfrastructure(builder.Configuration);
 builder.Services.AddIdentityApplication();
-builder.Services.AddIdentityAuthorizationPolicies();
+
+builder.Services.AddGrpcClient<CompanyGrpcService.CompanyGrpcServiceClient>((sp, options) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    
+    var companyApiUrl = config["services:company-api:grpc:0"] 
+                     ?? config["services:company-api:http:0"]
+                     ?? throw new InvalidOperationException("company-api endpoint configuration not found!");
+
+    options.Address = new Uri(companyApiUrl);
+});
 
 builder.Services.AddHealthChecks()
     .AddSqlServer(
@@ -34,10 +47,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseSharedKernelMiddlewares();
 
 app.MapAutEndPoints();
 app.MapUsersEndpoints();
-
-app.UseSharedKernelMiddlewares();
 app.UseSharedKernelEndpoints();
+
+await app.Services.SeedIdentityDatabaseAsync();
 app.Run();

@@ -16,12 +16,13 @@ namespace EcoFleet.Shared.Kernel
         public static IServiceCollection AddSharedKernel(this IServiceCollection services,IHostApplicationBuilder builder)
         {
             builder.AddServiceDefaults();
-            
+
             if (builder is WebApplicationBuilder webBuilder)
             {
                 webBuilder.Host.UseCustomSerilog();
             }
             services.AddHttpContextAccessor();
+            services.AddGrpc();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -39,6 +40,7 @@ namespace EcoFleet.Shared.Kernel
             app.UseMiddleware<CorrelationIdMiddleware>();
             app.UseExceptionHandler();
             app.UseAuthentication();
+            app.UseAuthorization();
             app.UseMiddleware<SecurityAuditMiddleware>();
            
             return app;

@@ -1,8 +1,10 @@
 using EcoFleet.Identity.Application.Common.Authentication.Interfaces;
 using EcoFleet.Identity.Application.Common.Interfaces.Authentication;
+using EcoFleet.Identity.Application.Common.Interfaces.Services;
 using EcoFleet.Identity.Application.Common.Persistence;
 using EcoFleet.Identity.Application.Features.Authentication.Common;
-using EcoFleet.Identity.Domain.ValueObjects;
+using EcoFleet.Shared.Kernel.Grpc;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
 using MediatR;
 
 namespace EcoFleet.Identity.Application.Features.Authentication.Commands.Login;
@@ -14,16 +16,21 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ITokenService _tokenService;
-    //private readonly IUnityOfWork _unityOfWork;
-   // private readonly ICompanyRepo _companyRepo;
+    private readonly IUnitOfWork _unityOfWork;
+    private readonly ICompanyGrpcClient _companyGrpcClient;
 
-    public LoginCommandHandler(IUserRepo userRepo, IPasswordHasher passwordHasher, ITokenService tokenService)//,ICompanyRepo companyRepo, IUnityOfWork unityOfWork)
+    public LoginCommandHandler(
+        IUserRepo userRepo, 
+        IPasswordHasher passwordHasher, 
+        ITokenService tokenService,
+        ICompanyGrpcClient companyGrpcClient,
+        IUnitOfWork unityOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
         _tokenService = tokenService;
-      //  _unityOfWork = unityOfWork;
-       //  _companyRepo = companyRepo;
+        _unityOfWork = unityOfWork;
+        _companyGrpcClient = companyGrpcClient;
     }
     public async Task<AuthenticationResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
@@ -31,11 +38,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
         if (string.IsNullOrWhiteSpace(domain))
             throw new UnauthorizedAccessException("Invalid email format.");
         
-     //   var company = await _companyRepo.GetCompanyByDomainWithoutTenantFilterAsync(domain, cancellationToken);
-   /*     if(company is null || !company.IsActive)
-            throw new UnauthorizedAccessException("The company associated with this email is either inactive or does not exist.");
+        var companyId = await _companyGrpcClient.GetCompanyByDomain(domain);
 
-        var user = await _userRepo.GetByEmailAndCompanyIdWithoutTenantFilterAsync(request.Email,company.Id, cancellationToken);
+        var user = await _userRepo.GetByEmailAndCompanyIdWithoutTenantFilterAsync(request.Email, companyId, cancellationToken);
         if(user is null)
             throw new UnauthorizedAccessException("Incorrect email or password.");
         
@@ -46,11 +51,6 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
         var tokenResult = await _tokenService.GenerateAndSaveTokensAsync(user, cancellationToken);
 
         await _unityOfWork.SaveChangesAsync(cancellationToken);
-*/
-        var user = await _userRepo.GetByIdAsync(Guid.NewGuid(), cancellationToken); // Placeholder for user retrieval logic
-        if(user is null)
-            throw new UnauthorizedAccessException("Incorrect email or password.");
-        var tokenResult = await _tokenService.GenerateAndSaveTokensAsync(user, cancellationToken);
         
         return new AuthenticationResult(
             user.Id,
