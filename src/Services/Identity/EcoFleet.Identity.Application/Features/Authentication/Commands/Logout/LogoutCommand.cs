@@ -1,4 +1,5 @@
 using EcoFleet.Identity.Application.Common.Persistence;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
 using MediatR;
 
 namespace EcoFleet.Identity.Application.Features.Authentication.Commands.Logout
@@ -11,25 +12,25 @@ namespace EcoFleet.Identity.Application.Features.Authentication.Commands.Logout
     public class LogoutCommandHandler : IRequestHandler<LogoutCommand>
     {
         private readonly IRefreshTokenRepo _refreshTokenRepo;
-  //      private readonly IUnityOfWork _unityOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public LogoutCommandHandler(IRefreshTokenRepo refreshTokenRepo
-         //IUnityOfWork unityOfWork
-         )
+        public LogoutCommandHandler(IRefreshTokenRepo refreshTokenRepo ,IUnitOfWork unitOfWork)
         {
             _refreshTokenRepo = refreshTokenRepo;
-       //     _unityOfWork = unityOfWork;
+            _unitOfWork = unitOfWork;
         }
         public async Task Handle(LogoutCommand request, CancellationToken cancellationToken)
         {
-            var token = await _refreshTokenRepo.GetByTokenAsync(request.RefreshToken, cancellationToken);
+            var token = await _refreshTokenRepo.FirstOrDefaultAsync(
+                rf => rf.Token == request.RefreshToken,
+                cancellationToken);
 
             if(token == null || !token.IsActive || token.UserId != request.UserId)
                 throw new UnauthorizedAccessException("Invalid operation or unauthorized token revocation request.");
 
-            token.Revoke();
+            token.MarkAsUsed();
 
-         //   await _unityOfWork.SaveChangesAsync(cancellationToken);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

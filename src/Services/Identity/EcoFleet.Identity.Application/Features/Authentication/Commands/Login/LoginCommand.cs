@@ -3,6 +3,7 @@ using EcoFleet.Identity.Application.Common.Interfaces.Authentication;
 using EcoFleet.Identity.Application.Common.Interfaces.Services;
 using EcoFleet.Identity.Application.Common.Persistence;
 using EcoFleet.Identity.Application.Features.Authentication.Common;
+using EcoFleet.Identity.Domain.ValueObjects;
 using EcoFleet.Shared.Kernel.Grpc;
 using EcoFleet.Shared.Kernel.Persistence.Interfaces;
 using MediatR;
@@ -40,7 +41,11 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthenticationR
         
         var companyId = await _companyGrpcClient.GetCompanyByDomain(domain);
 
-        var user = await _userRepo.GetByEmailAndCompanyIdWithoutTenantFilterAsync(request.Email, companyId, cancellationToken);
+        var emailVo = Email.Create(request.Email);
+        var user = await _userRepo.IgnoreTenantFilter().FirstOrDefaultAsync(
+            predicate: u => u.Email == emailVo && u.TenantId == companyId, 
+            cancellationToken: cancellationToken);
+            
         if(user is null)
             throw new UnauthorizedAccessException("Incorrect email or password.");
         
