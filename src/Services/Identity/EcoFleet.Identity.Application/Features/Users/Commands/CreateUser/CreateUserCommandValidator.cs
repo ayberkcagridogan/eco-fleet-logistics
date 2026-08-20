@@ -40,7 +40,7 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(x => x.Role)
             .NotEmpty().WithMessage("Role is required.")
             .IsEnumName(typeof(UserRole), caseSensitive: false)
-            .WithMessage("Invalid role specified. Valid roles are: User, Admin vs");
+            .WithMessage("Invalid role specified. Valid roles are: User, CompanyAdmin vs");
     }
 
     private async Task<bool> BeUniqueEmail(string email, CancellationToken token)
