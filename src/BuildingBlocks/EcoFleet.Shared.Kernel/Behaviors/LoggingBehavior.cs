@@ -16,7 +16,7 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
     {
         var requestName = typeof(TRequest).Name;
 
-        _logger.LogInformation("Handling {RequestName} {@Request}", requestName, request);
+        _logger.LogInformation("🚀 [START] {RequestName} | Data: {@Request}", requestName, request);
 
         var timer = Stopwatch.StartNew();
 
@@ -28,17 +28,15 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
 
             var elapsedMilliseconds = timer.ElapsedMilliseconds;
 
-            if (elapsedMilliseconds > 500) // 500ms'den uzun süren istekler için Warning basıyoruz
+            if (elapsedMilliseconds > 500) 
             {
-               _logger.LogWarning(
-                    "Long running request: {RequestName} ({ElapsedMilliseconds} ms)", 
+                _logger.LogWarning(
+                    "⚠️ [PERFORMANCE WARNING] Long running request: {RequestName} ({ElapsedMilliseconds} ms)", 
                     requestName, elapsedMilliseconds);
             }
             else
             {
-                _logger.LogInformation(
-                    "Handled command/query: {RequestName} ({ElapsedMilliseconds} ms)", 
-                    requestName, elapsedMilliseconds);
+                _logger.LogInformation("✅ [SUCCESS] {RequestName} | Duration: {ElapsedMs} ms", requestName, timer.ElapsedMilliseconds);
             }
             
             return response;
@@ -46,12 +44,7 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
         catch(Exception ex)
         {
             timer.Stop();
-
-            _logger.LogError(
-              ex,
-              "Requst {RequestName} faild after {ElapsedMilliseconds} ms",
-              requestName,
-              timer.ElapsedMilliseconds);
+            _logger.LogError(ex, "💥 [FAIL] {RequestName} | Duration: {ElapsedMs} ms | Exception: {Message}", requestName, timer.ElapsedMilliseconds, ex.Message);
               throw;
         }
     }

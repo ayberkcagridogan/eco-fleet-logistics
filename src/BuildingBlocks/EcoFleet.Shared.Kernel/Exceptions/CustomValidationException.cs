@@ -5,14 +5,14 @@ using FluentValidation.Results;
 
 namespace EcoFleet.Shared.Kernel.Exceptions
 {
-    public class ValidationException : BaseException
+    public class CustomValidationException : BaseException
     {
-        public ValidationException(IDictionary<string, string[]> errors) 
+        public CustomValidationException(IDictionary<string, string[]> errors) 
             : base("One or more validation failures have occurred.", HttpStatusCode.BadRequest, errors)
         {
         }
 
-        public ValidationException(IEnumerable<ValidationFailure> failures)
+        public CustomValidationException(IEnumerable<ValidationFailure> failures)
         : base( "One or more validation failures have occurred.", 
             HttpStatusCode.BadRequest, 
             ConvertFailuresToDictionary(failures))
