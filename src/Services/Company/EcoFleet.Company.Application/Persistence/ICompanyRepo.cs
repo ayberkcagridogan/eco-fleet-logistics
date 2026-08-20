@@ -1,20 +1,19 @@
+using System.Linq.Expressions;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
+
 namespace EcoFleet.Company.Application.Common.Persistence
 {
-    public interface ICompanyRepo
+    public interface ICompanyRepo : IRepositoryBase<Domain.Companies.Company, Guid>
     {
-        Task<Domain.Companies.Company?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<Domain.Companies.Company?> GetCompanyByDomainWithoutTenantFilterAsync(string domain, CancellationToken cancellationToken = default);
-        Task<bool> ExistsByTaxNumberAsync(string taxNumber, CancellationToken cancellationToken = default);
+        new ICompanyRepo IgnoreTenantFilter();
+        new ICompanyRepo AsNoTracking();
+        new ICompanyRepo Include(Expression<Func<Domain.Companies.Company, object>> navigationPropertyPath);
         Task<(List<Domain.Companies.Company> Items, int TotalCount)> GetPagedAsync(
                 int page, 
                 int pageSize, 
                 string? searchTerm, 
                 bool? isActive, 
                 CancellationToken cancellationToken = default);
-
-        Task AddAsync(Domain.Companies.Company company, CancellationToken cancellationToken = default);
-        void Update(Domain.Companies.Company company);
-        void Remove(Domain.Companies.Company company);
         Task<bool> HardDeleteCompanyAsync(Guid companyId, CancellationToken cancellationToken = default);
     }
 }

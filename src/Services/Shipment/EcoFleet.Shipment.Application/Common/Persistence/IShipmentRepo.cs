@@ -1,13 +1,13 @@
 
+using System.Linq.Expressions;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
+
 namespace EcoFleet.Shipment.Application.Common.Persistence
 {
-    public interface IShipmentRepo
+    public interface IShipmentRepo : IRepositoryBase<Domain.Shipments.Shipment, Guid>
     {
-        Task<Domain.Shipments.Shipment?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<Domain.Shipments.Shipment?> GetByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default);
-        Task AddAsync(Domain.Shipments.Shipment shipment, CancellationToken cancellationToken = default);
-        void Update(Domain.Shipments.Shipment shipment, CancellationToken cancellationToken = default);
-        Task<bool> ExistsByTrackingNumberAsync(string trackingNumber, CancellationToken cancellationToken = default);
-        void Remove(Domain.Shipments.Shipment shipment);
+        new IShipmentRepo IgnoreTenantFilter();
+        new IShipmentRepo AsNoTracking();
+        new IShipmentRepo Include(Expression<Func<Domain.Shipments.Shipment, object>> navigationPropertyPath);
     }
 }

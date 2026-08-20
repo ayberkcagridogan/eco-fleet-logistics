@@ -1,36 +1,25 @@
-
-using System.Runtime.CompilerServices;
+using System.Linq.Expressions;
 using EcoFleet.Identity.Application.Common.Persistence;
 using EcoFleet.Identity.Domain.Authentication;
-using Microsoft.EntityFrameworkCore;
+using EcoFleet.Shared.Kernel.Persistence;
+
 
 namespace EcoFleet.Identity.Infrastructure.Persistence.Repositories
 {
-    public class RefreshTokenRepo : IRefreshTokenRepo
+    public class RefreshTokenRepo : RepositoryBase<RefreshToken, Guid, IdentityDbContext> , IRefreshTokenRepo
     {
-        private readonly IdentityDbContext _context;
-        public RefreshTokenRepo(IdentityDbContext context)
-        {
-            _context = context;
-        }
-        public async Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
-        {
-            await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-        }
+        public RefreshTokenRepo(IdentityDbContext context) 
+        : base(context){}
+        protected RefreshTokenRepo(
+            IdentityDbContext context, 
+            bool ignoreTenantFilter,
+            bool isNoTrackingEnabled,
+            List<Expression<Func<RefreshToken, object>>> includes)
+        : base(context, ignoreTenantFilter, isNoTrackingEnabled, includes){}
 
-        public async Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
-        {
-            return await _context.RefreshTokens
-                     .Include(rt => rt.User)
-                     .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
-        }
-
-        public async Task<RefreshToken?> GetByTokenWithoutTenantFilterAsync(string refreshToken, CancellationToken cancellationToken = default)
-        {
-            return await _context.RefreshTokens
-                            //     .IgnoreTenantFilterIf(true)
-                                 .Include(rt => rt.User)
-                                 .FirstOrDefaultAsync(rt => rt.Token == refreshToken, cancellationToken);
-        }
+        public new IRefreshTokenRepo IgnoreTenantFilter() => (IRefreshTokenRepo)base.IgnoreTenantFilter();
+        public new IRefreshTokenRepo AsNoTracking() => (IRefreshTokenRepo)base.AsNoTracking();
+        public new IRefreshTokenRepo Include(Expression<Func<RefreshToken, object>> navigationPropertyPath) 
+                => (IRefreshTokenRepo)base.Include(navigationPropertyPath);
     }
 }

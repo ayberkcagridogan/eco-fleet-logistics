@@ -1,15 +1,15 @@
 
 
+using System.Linq.Expressions;
 using EcoFleet.Identity.Domain.Users;
 using EcoFleet.Identity.Domain.ValueObjects;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
 
 namespace EcoFleet.Identity.Application.Common.Persistence;
 
-public interface IUserRepo
+public interface IUserRepo : IRepositoryBase<User, Guid>
 {
-    Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default);
-    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<User?> GetByEmailAndCompanyIdWithoutTenantFilterAsync(string email, Guid companyId, CancellationToken cancellationToken = default);
-    Task AddAsync(User user, CancellationToken cancellationToken = default);
-    Task<bool> ExistsByEmailAsync(Email email, CancellationToken cancellationToken = default);
+    new IUserRepo IgnoreTenantFilter();
+    new IUserRepo AsNoTracking();
+    new IUserRepo Include(Expression<Func<User, object>> navigationPropertyPath);
 }

@@ -29,7 +29,7 @@ public class UpdateShipmentCommandHandler : IRequestHandler<UpdateShipmentComman
             return false;
 
         shipment.UpdateDetails(request.ReceiverName, request.DestinationAddress);
-         _shipmentRepo.Update(shipment, cancellationToken);
+         _shipmentRepo.Update(shipment);
      //   await _unityOfWork.SaveChangesAsync(cancellationToken);
         
         return true;

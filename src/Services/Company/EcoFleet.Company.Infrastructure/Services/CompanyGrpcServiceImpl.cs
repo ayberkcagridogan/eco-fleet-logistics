@@ -41,7 +41,9 @@ namespace EcoFleet.Company.Infrastructure.Services
         ServerCallContext context)
         {
             _logger.LogInformation("Company By Domain: {Domain}", request.Domain);
-            var company = await _companyRepo.GetCompanyByDomainWithoutTenantFilterAsync(request.Domain, context.CancellationToken);
+            var company = await _companyRepo.IgnoreTenantFilter().FirstOrDefaultAsync(
+                predicate:x => x.Domain == request.Domain,
+                cancellationToken: context.CancellationToken);
 
             if (company is null)
             {

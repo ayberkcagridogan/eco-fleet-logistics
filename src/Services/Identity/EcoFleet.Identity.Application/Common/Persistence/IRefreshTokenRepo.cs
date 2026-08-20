@@ -1,12 +1,13 @@
+using System.Linq.Expressions;
 using EcoFleet.Identity.Domain.Authentication;
+using EcoFleet.Shared.Kernel.Persistence.Interfaces;
 
 namespace EcoFleet.Identity.Application.Common.Persistence;
 
 
-public interface IRefreshTokenRepo
+public interface IRefreshTokenRepo : IRepositoryBase<RefreshToken, Guid>
 {
-    Task<RefreshToken?> GetByTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
-    Task<RefreshToken?> GetByTokenWithoutTenantFilterAsync(string refreshToken, CancellationToken cancellationToken = default);
-    Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default);
-
+    new IRefreshTokenRepo IgnoreTenantFilter();
+    new IRefreshTokenRepo AsNoTracking();
+    new IRefreshTokenRepo Include(Expression<Func<RefreshToken, object>> navigationPropertyPath);
 }
