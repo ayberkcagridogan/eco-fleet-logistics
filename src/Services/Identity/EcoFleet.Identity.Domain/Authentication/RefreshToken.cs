@@ -7,22 +7,22 @@ public class RefreshToken : BaseEntity<Guid>
 {
     public string Token { get; private set; }  = null!;
     public DateTime ExpiresAt { get; private set; }
-    public DateTime? RevokedAt { get; private set; }
+    public DateTime? UsedAt { get; private set; }
     public Guid UserId { get; private set; }
     public User User { get; private set; } = null!;
 
     public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
-    public bool IsRevoked => RevokedAt != null;
-    public bool IsActive => !IsRevoked && !IsExpired;
+    public bool IsUsed => UsedAt != null;
+    public bool IsActive => !IsDeleted && !IsExpired && !IsUsed;
 
     private RefreshToken(){}
-    private RefreshToken(Guid id, string token, DateTime expiresAt, DateTime createdAt, Guid userId)
+    private RefreshToken(Guid id, string token, DateTime expiresAt, Guid userId)
     {
         Id = id;
         Token = token;
         ExpiresAt = expiresAt;
-        CreatedAt = createdAt;
         UserId = userId;
+        CreatedById = userId;
     }
 
     public static RefreshToken Create(string token, DateTime expiresAt, Guid userId)
@@ -37,14 +37,21 @@ public class RefreshToken : BaseEntity<Guid>
             Guid.NewGuid(),
             token,
             expiresAt,
-            DateTime.UtcNow,
             userId);
     }
 
-    public void Revoke()
+    public void MarkAsDeleted(Guid deletedById)
     {
-        if(IsRevoked) return;
+        DeletedById = deletedById;
+    }
+    public void MarkAsUsed(Guid? updatedById = null)
+    {
+        if (IsUsed) return;
 
-        RevokedAt = DateTime.UtcNow;
+        UsedAt = DateTime.UtcNow;
+        if (updatedById.HasValue && updatedById.Value != Guid.Empty)
+        {
+            UpdatedById = updatedById.Value;
+        }
     }
 }

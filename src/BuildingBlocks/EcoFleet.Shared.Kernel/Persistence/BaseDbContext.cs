@@ -23,7 +23,7 @@ namespace EcoFleet.Shared.Kernel.Persistence
 
         private void ApplyAuditAndSoftDeleteConcepts()
         {
-            var utcNow = DateTimeOffset.UtcNow;
+            var utcNow = DateTime.UtcNow;
             var userId = _currentUserService.UserId;
 
             foreach (var entry in ChangeTracker.Entries())
@@ -35,13 +35,14 @@ namespace EcoFleet.Shared.Kernel.Persistence
                     {
                         entry.Property(nameof(IAuditableEntity.CreatedAt)).CurrentValue = utcNow;
                         var createdByIdProp = entry.Property(nameof(IAuditableEntity.CreatedById));
-                        if(createdByIdProp.CurrentValue is null)
+                        if(userId.HasValue && userId.Value != Guid.Empty)
                             createdByIdProp.CurrentValue = userId;
                     }
                     else if (entry.State == EntityState.Modified)
                     {
                         entry.Property(nameof(IAuditableEntity.UpdatedAt)).CurrentValue = utcNow;
-                        entry.Property(nameof(IAuditableEntity.UpdatedById)).CurrentValue = userId;
+                        if(userId.HasValue && userId.Value != Guid.Empty)
+                            entry.Property(nameof(IAuditableEntity.UpdatedById)).CurrentValue = userId;
                     }
                 }
 
@@ -52,7 +53,10 @@ namespace EcoFleet.Shared.Kernel.Persistence
 
                     entry.Property(nameof(ISoftDelete.IsDeleted)).CurrentValue = true;
                     entry.Property(nameof(ISoftDelete.DeletedAt)).CurrentValue = utcNow;
-                    entry.Property(nameof(ISoftDelete.DeletedById)).CurrentValue = userId;
+                    if (userId.HasValue && userId.Value != Guid.Empty)
+                    {
+                        entry.Property(nameof(ISoftDelete.DeletedById)).CurrentValue = userId;
+                    }
                 }
 
                 // 3. Multi-Tenant Auto Assignment
