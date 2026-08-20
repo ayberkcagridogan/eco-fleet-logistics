@@ -1,6 +1,7 @@
 using EcoFleet.Identity.Application.Common.Persistence;
 using EcoFleet.Identity.Domain.Users;
 using EcoFleet.Identity.Domain.ValueObjects;
+using EcoFleet.Shared.Kernel.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoFleet.Identity.Infrastructure.Persistence.Repositories;
@@ -36,7 +37,7 @@ public class UserRepo : IUserRepo
     {
         var emailVo = Email.Create(email);
         return await _context.Users
-                    //    .IgnoreTenantFilterIf(true)
+                        .IgnoreTenantFilterIf(true)
                         .FirstOrDefaultAsync(u => u.Email == emailVo && u.TenantId == tenantId, cancellationToken);
     }
 

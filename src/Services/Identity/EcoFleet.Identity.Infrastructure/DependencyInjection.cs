@@ -1,11 +1,14 @@
 
+using System.Threading.Tasks;
 using EcoFleet.Identity.Application.Common.Authentication.Interfaces;
 using EcoFleet.Identity.Application.Common.Interfaces.Authentication;
+using EcoFleet.Identity.Application.Common.Interfaces.Services;
 using EcoFleet.Identity.Application.Common.Persistence;
 using EcoFleet.Identity.Application.Features.Authentication.Common;
 using EcoFleet.Identity.Infrastructure.Authentication;
 using EcoFleet.Identity.Infrastructure.Persistence;
 using EcoFleet.Identity.Infrastructure.Persistence.Repositories;
+using EcoFleet.Identity.Infrastructure.Services;
 using EcoFleet.Shared.Kernel.Persistence.Interfaces;
 using EcoFleetLogistics.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +37,13 @@ public static class DependencyInjection {
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IUnitOfWork, UnitOfWork<IdentityDbContext>>();
+        services.AddScoped<ICompanyGrpcClient, CompanyGrpcClient>();
         
         return services;
+    }
+
+    public static async Task SeedIdentityDatabaseAsync(this IServiceProvider serviceProvider, CancellationToken ct= default)
+    {
+        await DataSeeder.SeedSuperAdminAsync(serviceProvider,ct);
     }
 }

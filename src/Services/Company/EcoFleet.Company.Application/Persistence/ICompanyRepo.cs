@@ -15,5 +15,6 @@ namespace EcoFleet.Company.Application.Common.Persistence
         Task AddAsync(Domain.Companies.Company company, CancellationToken cancellationToken = default);
         void Update(Domain.Companies.Company company);
         void Remove(Domain.Companies.Company company);
+        Task<bool> HardDeleteCompanyAsync(Guid companyId, CancellationToken cancellationToken = default);
     }
 }

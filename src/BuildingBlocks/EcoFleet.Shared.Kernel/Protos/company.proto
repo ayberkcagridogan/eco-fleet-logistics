@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+option csharp_namespace = "EcoFleet.Shared.Kernel.Grpc";
+
+package company;
+
+service CompanyGrpcService {
+  rpc ValidateCompany (ValidateCompanyRequest) returns (ValidateCompanyResponse);
+  rpc GetCompanyByDomain (GetCompanyByDomainRequest) returns (GetCompanyByDomainResponse);
+  rpc CreateCompany (CreateCompanyRequest) returns (CreateCompanyResponse);
+  rpc RollbackCompany (RollbackCompanyRequest) returns (RollbackCompanyResponse);
+}
+
+message ValidateCompanyRequest {
+  string company_id = 1;
+}
+
+message ValidateCompanyResponse {
+  bool is_valid = 1;
+  string company_name = 2;
+  string tax_number = 3;
+}
+
+message GetCompanyByDomainRequest {
+  string domain = 1;
+}
+
+message GetCompanyByDomainResponse {
+  bool exists = 1;
+  bool is_active = 2;
+  string company_id = 3;
+  string company_name = 4;
+}
+
+message CreateCompanyRequest {
+  string name = 1;
+  string tax_number = 2;
+  string admin_email = 3;
+  string domain = 4;
+}
+
+message CreateCompanyResponse {
+  string company_id = 1;
+  bool is_success = 2;
+  string message = 3;
+}
+
+message RollbackCompanyRequest {
+  string company_id = 1;
+}
+
+message RollbackCompanyResponse {
+  bool is_success = 2;
+  string message = 3;
+}
