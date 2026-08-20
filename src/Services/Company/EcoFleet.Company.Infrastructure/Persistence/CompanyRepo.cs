@@ -1,44 +1,32 @@
+using System.Linq.Expressions;
 using EcoFleet.Company.Application.Common.Persistence;
+using EcoFleet.Shared.Kernel.Persistence;
 using EcoFleet.Shared.Kernel.Persistence.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcoFleet.Company.Infrastructure.Persistence.Repositories
 {
-    public class CompanyRepo : ICompanyRepo
+    public class CompanyRepo : RepositoryBase<Domain.Companies.Company, Guid, CompanyDbContext>, ICompanyRepo
     {
-        private readonly CompanyDbContext _context;
 
         public CompanyRepo(CompanyDbContext context)
-        {
-            _context = context;
-        }
+        : base(context){}
 
-        public async Task AddAsync(Domain.Companies.Company company, CancellationToken cancellationToken = default)
-        {
-             await _context.Companies.AddAsync(company);
-        }
+        protected CompanyRepo(
+            CompanyDbContext context, 
+            bool isTenantFilterIgnored,
+            bool isNoTrackingEnabled,
+            List<Expression<Func<Domain.Companies.Company, object>>> includes)
+        :base (context, isTenantFilterIgnored , isNoTrackingEnabled , includes){}
 
-        public async Task<bool> ExistsByTaxNumberAsync(string taxNumber, CancellationToken cancellationToken = default)
-        {
-            return await _context.Companies
-                .AnyAsync(x => x.TaxNumber == taxNumber, cancellationToken);
-        }
-
-        public async Task<Domain.Companies.Company?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-        {
-            return await _context.Companies
-                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        }
-        public async Task<Domain.Companies.Company?> GetCompanyByDomainWithoutTenantFilterAsync(string domain, CancellationToken cancellationToken = default)
-        {
-            return await _context.Companies
-                    .IgnoreTenantFilterIf(true)
-                    .FirstOrDefaultAsync(x => x.Domain == domain, cancellationToken);
-        }
-
+        public new ICompanyRepo IgnoreTenantFilter() => (ICompanyRepo)base.IgnoreTenantFilter();
+        public new ICompanyRepo AsNoTracking() => (ICompanyRepo)base.AsNoTracking();
+        public new ICompanyRepo Include(Expression<Func<Domain.Companies.Company, object>> navigationPropertyPath) 
+                => (ICompanyRepo)base.Include(navigationPropertyPath);
+                
         public async Task<(List<Domain.Companies.Company> Items, int TotalCount)> GetPagedAsync(int page, int pageSize, string? searchTerm, bool? isActive, CancellationToken cancellationToken = default)
         {
-            var query = _context.Companies
+            var query = Query()
                 .AsNoTracking()
                 .AsQueryable();
 
@@ -66,18 +54,10 @@ namespace EcoFleet.Company.Infrastructure.Persistence.Repositories
              return (items, totalCount);
         }
 
-        public void Update(Domain.Companies.Company company)
-        {
-            _context.Companies.Update(company);
-        }
-        public void Remove(Domain.Companies.Company company)
-        {
-            _context.Companies.Remove(company);
-        }
 
         public async Task<bool> HardDeleteCompanyAsync(Guid companyId, CancellationToken cancellationToken = default)
         {
-            var affectedRows = await _context.Companies
+            var affectedRows = await Query()
                     .Where(c => c.Id == companyId)
                     .ExecuteDeleteAsync(cancellationToken);
 

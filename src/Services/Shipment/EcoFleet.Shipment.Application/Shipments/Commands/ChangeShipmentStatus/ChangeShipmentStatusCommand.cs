@@ -43,7 +43,7 @@ public class ChangeShipmentStatusCommandHandler : IRequestHandler<ChangeShipment
             default:
                 throw new InvalidOperationException($"Unsupported status transition to {request.NewStatus}.");
         }
-        _shipmentRepo.Update(shipment, cancellationToken);
+        _shipmentRepo.Update(shipment);
         // await _unityOfWork.SaveChangesAsync(cancellationToken);
         return true;
     }

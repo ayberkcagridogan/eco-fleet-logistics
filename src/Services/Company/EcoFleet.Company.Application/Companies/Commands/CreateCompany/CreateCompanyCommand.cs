@@ -28,7 +28,7 @@ namespace EcoFleet.Company.Application.Companies.Commands.CreateCompany
         }
         public async Task<Guid> Handle(CreateCompanyCommand request, CancellationToken cancellationToken)
         {
-            var taxNumberExists = await _companyRepo.ExistsByTaxNumberAsync(request.TaxNumber, cancellationToken);
+            var taxNumberExists = await _companyRepo.AnyAsync(x => x.TaxNumber == request.TaxNumber, cancellationToken);
             if (taxNumberExists)
             {
                 throw new InvalidOperationException($"Company with Tax Number '{request.TaxNumber}' already exists.");

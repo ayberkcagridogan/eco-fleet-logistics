@@ -48,7 +48,7 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         try
         {
             var emailVo = Email.Create(email);
-            return !await _userRepo.ExistsByEmailAsync(emailVo, token);
+            return !await _userRepo.AnyAsync(u => u.Email == emailVo , token);
         }
         catch
         {
