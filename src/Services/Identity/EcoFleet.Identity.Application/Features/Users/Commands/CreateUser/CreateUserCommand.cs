@@ -23,21 +23,18 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Creat
     private readonly IUserRepo _userRepo;
     private readonly IPasswordHasher _passwordHasher;
     private readonly ICurrentUserService _currentUserService;
-    private readonly ICompanyGrpcClient _companyGrpcClient;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateUserCommandHandler(
             IUserRepo userRepo, 
             IPasswordHasher passwordHasher, 
             ICurrentUserService currentUserService, 
-            IUnitOfWork unitOfWork,
-            ICompanyGrpcClient companyGrpcClient)
+            IUnitOfWork unitOfWork)
     {
         _userRepo = userRepo;
         _passwordHasher = passwordHasher;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
-        _companyGrpcClient = companyGrpcClient;
     }
     public async Task<CreateUserResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
